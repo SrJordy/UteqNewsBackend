@@ -55,8 +55,8 @@ uteqApiClient.interceptors.request.use(async (config) => {
 }, (error) => Promise.reject(error));
 
 // --- TIPOS DE DATOS ---
-interface ApiNews { ntCodigo: number; ntUrlNoticia: string; ntUrlPortada: string; ntTitulo: string; ntFecha: string; }
-export interface ProcessedNews { id: number; title: string; date: string; newsUrl: string; coverUrl: string; }
+interface ApiNews { ntUrlPortada: string; ntTitular: string; ntUrlNoticia: string; ntFecha: string; objDepartamento?: { dpNombre: string; }; objCategoriaNotc?: { gtTitular: string; gtColorIdentf: string; }; }
+export interface ProcessedNews { id: string; title: string; date: string; newsUrl: string; coverUrl: string; departmentName?: string; categoryName?: string; categoryColor?: string; }
 interface ApiWeeklySummary { fechapub: string; titulo: string; urlvideo1: string; portadaVideo: string; }
 export interface ProcessedWeeklySummary { title: string; videoUrl: string; coverUrl: string; date: string; }
 interface ApiMagazine { anio: number; mes: number; urlportada: string; urlpw: string; }
@@ -69,7 +69,7 @@ interface ApiTikTok { fechapub: string; titulo: string; urlvideo1: string; porta
 export interface ProcessedTikTok { date: string; title: string; videoUrl: string; coverUrl: string; }
 
 // --- PROCESADORES DE DATOS ---
-const processNewsData = (news: ApiNews[]): ProcessedNews[] => news.map(item => ({ id: item.ntCodigo, title: item.ntTitulo, date: item.ntFecha, newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia}`, coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada}` }));
+const processNewsData = (news: ApiNews[]): ProcessedNews[] => news.map(item => ({ id: item.ntTitular, title: item.ntTitular, date: item.ntFecha, newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia}`, coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada}`, departmentName: item.objDepartamento?.dpNombre, categoryName: item.objCategoriaNotc?.gtTitular, categoryColor: item.objCategoriaNotc?.gtColorIdentf, }));
 const processWeeklySummaryData = (summaries: ApiWeeklySummary[]): ProcessedWeeklySummary[] => summaries.map(item => ({ title: item.titulo, videoUrl: item.urlvideo1, coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${item.portadaVideo}`, date: item.fechapub }));
 const processMagazineData = (magazines: ApiMagazine[]): ProcessedMagazine[] => magazines.map(item => ({ year: item.anio, month: item.mes, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${item.urlportada}`, pdfUrl: item.urlpw }));
 const processFacultyData = (faculties: ApiFaculty[]): ProcessedFaculty[] => faculties.map(item => ({ id: item.dpCodigo, name: item.dpNombre, mission: item.dpMision, vision: item.dpVision, videoUrl: item.dpUrlVideo, facebookUrl: item.dpCtaFacb, color: item.dpColor, facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl}` }));
@@ -97,7 +97,7 @@ const fetchData = async <T, U>(endpoint: string, processor: (data: T[]) => U[]):
     }
 };
 
-// Exportar todas las funciones de servicio que usan fetchData
+// Exportar todas las funciones de servicio que usan fetchData (DECLARADAS ANTES DE USARSE)
 export const getLatestNews = () => fetchData<ApiNews, ProcessedNews>('/1', processNewsData);
 export const getAllNews = () => fetchData<ApiNews, ProcessedNews>('/2', processNewsData);
 export const getLatestWeeklySummaries = () => fetchData<ApiWeeklySummary, ProcessedWeeklySummary>('/3', processWeeklySummaryData);
@@ -129,7 +129,7 @@ export const getCareersByFaculty = async (facultyId: string): Promise<ProcessedC
     }
 };
 
-// --- SERVICIO DE FILTRADO GENERALIZADO ---
+// --- SERVICIO DE FILTRADO GENERALIZADO (USA LAS FUNCIONES EXPORTADAS ANTERIORMENTE) ---
 type ContentType = 'news' | 'weekly-summaries' | 'tiktoks';
 
 export const getFilteredContent = async (contentType: ContentType, userEmail: string): Promise<any[] | { message: string }> => {

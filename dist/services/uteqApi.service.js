@@ -55,7 +55,7 @@ exports.uteqApiClient.interceptors.request.use(async (config) => {
     return config;
 }, (error) => Promise.reject(error));
 // --- PROCESADORES DE DATOS ---
-const processNewsData = (news) => news.map(item => ({ id: item.ntCodigo, title: item.ntTitulo, date: item.ntFecha, newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia}`, coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada}` }));
+const processNewsData = (news) => news.map(item => ({ id: item.ntTitular, title: item.ntTitular, date: item.ntFecha, newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia}`, coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada}`, departmentName: item.objDepartamento?.dpNombre, categoryName: item.objCategoriaNotc?.gtTitular, categoryColor: item.objCategoriaNotc?.gtColorIdentf, }));
 const processWeeklySummaryData = (summaries) => summaries.map(item => ({ title: item.titulo, videoUrl: item.urlvideo1, coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${item.portadaVideo}`, date: item.fechapub }));
 const processMagazineData = (magazines) => magazines.map(item => ({ year: item.anio, month: item.mes, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${item.urlportada}`, pdfUrl: item.urlpw }));
 const processFacultyData = (faculties) => faculties.map(item => ({ id: item.dpCodigo, name: item.dpNombre, mission: item.dpMision, vision: item.dpVision, videoUrl: item.dpUrlVideo, facebookUrl: item.dpCtaFacb, color: item.dpColor, facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl}` }));
@@ -81,7 +81,7 @@ const fetchData = async (endpoint, processor) => {
         throw new Error(`No se pudieron obtener los datos del endpoint ${endpoint}.`);
     }
 };
-// Exportar todas las funciones de servicio que usan fetchData
+// Exportar todas las funciones de servicio que usan fetchData (DECLARADAS ANTES DE USARSE)
 const getLatestNews = () => fetchData('/1', processNewsData);
 exports.getLatestNews = getLatestNews;
 const getAllNews = () => fetchData('/2', processNewsData);
