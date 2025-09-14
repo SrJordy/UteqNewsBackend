@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
+const cors_1 = __importDefault(require("@fastify/cors")); // Importar el plugin CORS
 const news_routes_1 = __importDefault(require("./routes/news.routes"));
 const videos_routes_1 = __importDefault(require("./routes/videos.routes"));
 const magazine_routes_1 = __importDefault(require("./routes/magazine.routes"));
@@ -12,6 +13,10 @@ const career_routes_1 = __importDefault(require("./routes/career.routes"));
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
 const server = (0, fastify_1.default)({ logger: true });
+// Registrar el plugin CORS
+server.register(cors_1.default, {
+    origin: '*' // Permitir todas las solicitudes de origen (para desarrollo)
+});
 // Ruta principal para verificar el estado del servidor
 server.get('/', async (request, reply) => {
     return { status: 'ok', message: 'Servidor UTEQNewsBackend funcionando' };
@@ -26,8 +31,8 @@ server.register(career_routes_1.default, { prefix: '/api/careers' });
 server.register(ai_routes_1.default, { prefix: '/api/ai' });
 const start = async () => {
     try {
-        await server.listen({ port: 3000 });
-        server.log.info('🚀 Servidor corriendo en http://localhost:3000');
+        await server.listen({ port: 3000, host: '0.0.0.0' });
+        server.log.info('🚀 Servidor corriendo en http://0.0.0.0:3000');
     }
     catch (err) {
         server.log.error(err);
