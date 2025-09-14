@@ -10,6 +10,7 @@ const magazine_routes_1 = __importDefault(require("./routes/magazine.routes"));
 const faculty_routes_1 = __importDefault(require("./routes/faculty.routes"));
 const career_routes_1 = __importDefault(require("./routes/career.routes"));
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
+const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
 const server = (0, fastify_1.default)({ logger: true });
 // Ruta principal para verificar el estado del servidor
 server.get('/', async (request, reply) => {
@@ -22,6 +23,7 @@ server.register(videos_routes_1.default, { prefix: '/api/videos' });
 server.register(magazine_routes_1.default, { prefix: '/api/magazines' });
 server.register(faculty_routes_1.default, { prefix: '/api/faculties' });
 server.register(career_routes_1.default, { prefix: '/api/careers' });
+server.register(ai_routes_1.default, { prefix: '/api/ai' });
 const start = async () => {
     try {
         await server.listen({ port: 3000 });

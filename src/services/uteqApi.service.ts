@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import https from 'https';
 import { getPreferences } from './auth.service';
@@ -85,9 +86,9 @@ export const getCareers = () => fetchData<ApiCareer, ProcessedCareer>('/8', proc
 export const getCareersByFaculty = async (facultyId: string): Promise<ProcessedCareer[]> => { try { const response = await uteqApiClient.get<ApiCareer[]>(`/9/${facultyId}`); return processCareerData(response.data); } catch (error) { console.error(`Error al obtener las carreras para la facultad ${facultyId}:`, error); throw new Error('No se pudieron obtener las carreras para la facultad especificada.'); } };
 
 // --- SERVICIO DE FILTRADO GENERALIZADO ---
-type ContentType = 'news' | 'weekly-summaries' | 'tiktoks'; // Eliminado 'magazines'
+type ContentType = 'news' | 'weekly-summaries' | 'tiktoks';
 
-export const getFilteredContent = async (contentType: ContentType, userEmail: string): Promise<any[]> => {
+export const getFilteredContent = async (contentType: ContentType, userEmail: string): Promise<any[] | { message: string }> => {
     try {
         const userPreferences = await getPreferences(userEmail); // Obtener preferencias del usuario
 
@@ -111,10 +112,14 @@ export const getFilteredContent = async (contentType: ContentType, userEmail: st
         }
 
         const filteredContent = allContent.filter((item: any) => {
-            // Asumimos que todos los tipos de contenido tienen un campo 'title' para filtrar
             const itemTitle = item.title ? item.title.toLowerCase() : '';
             return preferredCareerNames.some(pref => itemTitle.includes(pref));
         });
+
+        // Si no hay coincidencias después de filtrar
+        if (filteredContent.length === 0) {
+            return { message: "No existen coincidencias con las preferencias del usuario." };
+        }
 
         // Devolver los 10 primeros elementos filtrados
         return filteredContent.slice(0, 10);

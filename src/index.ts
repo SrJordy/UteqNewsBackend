@@ -1,4 +1,3 @@
-
 import Fastify from 'fastify';
 import newsRoutes from './routes/news.routes';
 import videosRoutes from './routes/videos.routes';
@@ -6,6 +5,7 @@ import magazineRoutes from './routes/magazine.routes';
 import facultyRoutes from './routes/faculty.routes';
 import careerRoutes from './routes/career.routes';
 import authRoutes from './routes/auth.routes';
+import aiRoutes from './routes/ai.routes';
 
 const server = Fastify({ logger: true });
 
@@ -21,6 +21,7 @@ server.register(videosRoutes, { prefix: '/api/videos' });
 server.register(magazineRoutes, { prefix: '/api/magazines' });
 server.register(facultyRoutes, { prefix: '/api/faculties' });
 server.register(careerRoutes, { prefix: '/api/careers' });
+server.register(aiRoutes, { prefix: '/api/ai' });
 
 
 const start = async () => {

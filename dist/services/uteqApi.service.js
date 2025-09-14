@@ -118,10 +118,13 @@ const getFilteredContent = async (contentType, userEmail) => {
                 break;
         }
         const filteredContent = allContent.filter((item) => {
-            // Asumimos que todos los tipos de contenido tienen un campo 'title' para filtrar
             const itemTitle = item.title ? item.title.toLowerCase() : '';
             return preferredCareerNames.some(pref => itemTitle.includes(pref));
         });
+        // Si no hay coincidencias después de filtrar
+        if (filteredContent.length === 0) {
+            return { message: "No existen coincidencias con las preferencias del usuario." };
+        }
         // Devolver los 10 primeros elementos filtrados
         return filteredContent.slice(0, 10);
     }
