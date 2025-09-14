@@ -3,9 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllTikToks = exports.getLatestTikToks = exports.getCareersByFaculty = exports.getCareers = exports.getFaculties = exports.getAllMagazines = exports.getLatestMagazines = exports.getAllWeeklySummaries = exports.getLatestWeeklySummaries = exports.getAllNews = exports.getLatestNews = exports.uteqApiClient = exports.authenticate = void 0;
+exports.getAllTikToks = exports.getLatestTikToks = exports.getFilteredContent = exports.getCareersByFaculty = exports.getCareers = exports.getFaculties = exports.getAllMagazines = exports.getLatestMagazines = exports.getAllWeeklySummaries = exports.getLatestWeeklySummaries = exports.getAllNews = exports.getLatestNews = exports.uteqApiClient = exports.authenticate = void 0;
 const axios_1 = __importDefault(require("axios"));
 const https_1 = __importDefault(require("https"));
+const auth_service_1 = require("./auth.service");
 // --- Configuración de la API de UTEQ ---
 const UTEQ_API_BASE_URL = 'https://apiws.uteq.edu.ec/h6RPoSoRaah0Y4Bah28eew';
 const AUTH_CREDENTIALS = { username: "_x1userdev", password: "LineGold179#5ft2" };
@@ -17,7 +18,7 @@ const MAGAZINE_COVER_URL_PREFIX = 'https://uteq.edu.ec/assets/images/newspapers/
 const FACULTY_URL_PREFIX = 'https://uteq.edu.ec/es/grado/facultad/';
 const CAREER_URL_PREFIX = 'https://uteq.edu.ec/es/grado/carrera/';
 const CAREER_IMAGE_URL_PREFIX = 'https://uteq.edu.ec/assets/images/front-pages/';
-const TIKTOK_COVER_URL = 'https://www.uteq.edu.ec/assets/img/portada-tiktok-video.jpg'; // URL Estática
+const TIKTOK_COVER_URL = 'https://www.uteq.edu.ec/assets/img/portada-tiktok-video.jpg';
 // AGENTE PARA IGNORAR ERRORES DE CERTIFICADO SSL (SOLO PARA DESARROLLO)
 const insecureAgent = new https_1.default.Agent({ rejectUnauthorized: false });
 let accessToken = null;
@@ -91,6 +92,45 @@ catch (error) {
     throw new Error('No se pudieron obtener las carreras para la facultad especificada.');
 } };
 exports.getCareersByFaculty = getCareersByFaculty;
+const getFilteredContent = async (contentType, userEmail) => {
+    try {
+        const userPreferences = await (0, auth_service_1.getPreferences)(userEmail); // Obtener preferencias del usuario
+        if (!userPreferences || userPreferences.preferences.length === 0) {
+            // Si no hay preferencias, devolver los 10 últimos elementos del tipo de contenido
+            switch (contentType) {
+                case 'news': return (await (0, exports.getLatestNews)()).slice(0, 10);
+                case 'weekly-summaries': return (await (0, exports.getLatestWeeklySummaries)()).slice(0, 10);
+                case 'tiktoks': return (await (0, exports.getLatestTikToks)()).slice(0, 10);
+                default: return [];
+            }
+        }
+        const preferredCareerNames = userPreferences.preferences.map(p => p.toLowerCase());
+        let allContent = [];
+        switch (contentType) {
+            case 'news':
+                allContent = await (0, exports.getAllNews)();
+                break;
+            case 'weekly-summaries':
+                allContent = await (0, exports.getAllWeeklySummaries)();
+                break;
+            case 'tiktoks':
+                allContent = await (0, exports.getAllTikToks)();
+                break;
+        }
+        const filteredContent = allContent.filter((item) => {
+            // Asumimos que todos los tipos de contenido tienen un campo 'title' para filtrar
+            const itemTitle = item.title ? item.title.toLowerCase() : '';
+            return preferredCareerNames.some(pref => itemTitle.includes(pref));
+        });
+        // Devolver los 10 primeros elementos filtrados
+        return filteredContent.slice(0, 10);
+    }
+    catch (error) {
+        console.error(`Error al obtener contenido filtrado de tipo ${contentType} para ${userEmail}:`, error);
+        throw new Error(`No se pudieron obtener los ${contentType} filtrados.`);
+    }
+};
+exports.getFilteredContent = getFilteredContent;
 const getLatestTikToks = () => fetchData('/10', processTikTokData);
 exports.getLatestTikToks = getLatestTikToks;
 const getAllTikToks = () => fetchData('/11', processTikTokData);

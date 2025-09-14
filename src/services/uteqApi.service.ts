@@ -1,6 +1,6 @@
-
 import axios from 'axios';
 import https from 'https';
+import { getPreferences } from './auth.service';
 
 // --- Configuración de la API de UTEQ ---
 const UTEQ_API_BASE_URL = 'https://apiws.uteq.edu.ec/h6RPoSoRaah0Y4Bah28eew';
@@ -14,7 +14,7 @@ const MAGAZINE_COVER_URL_PREFIX = 'https://uteq.edu.ec/assets/images/newspapers/
 const FACULTY_URL_PREFIX = 'https://uteq.edu.ec/es/grado/facultad/';
 const CAREER_URL_PREFIX = 'https://uteq.edu.ec/es/grado/carrera/';
 const CAREER_IMAGE_URL_PREFIX = 'https://uteq.edu.ec/assets/images/front-pages/';
-const TIKTOK_COVER_URL = 'https://www.uteq.edu.ec/assets/img/portada-tiktok-video.jpg'; // URL Estática
+const TIKTOK_COVER_URL = 'https://www.uteq.edu.ec/assets/img/portada-tiktok-video.jpg';
 
 // AGENTE PARA IGNORAR ERRORES DE CERTIFICADO SSL (SOLO PARA DESARROLLO)
 const insecureAgent = new https.Agent({ rejectUnauthorized: false });
@@ -83,5 +83,46 @@ export const getAllMagazines = () => fetchData<ApiMagazine, ProcessedMagazine>('
 export const getFaculties = () => fetchData<ApiFaculty, ProcessedFaculty>('/7', processFacultyData);
 export const getCareers = () => fetchData<ApiCareer, ProcessedCareer>('/8', processCareerData);
 export const getCareersByFaculty = async (facultyId: string): Promise<ProcessedCareer[]> => { try { const response = await uteqApiClient.get<ApiCareer[]>(`/9/${facultyId}`); return processCareerData(response.data); } catch (error) { console.error(`Error al obtener las carreras para la facultad ${facultyId}:`, error); throw new Error('No se pudieron obtener las carreras para la facultad especificada.'); } };
+
+// --- SERVICIO DE FILTRADO GENERALIZADO ---
+type ContentType = 'news' | 'weekly-summaries' | 'tiktoks'; // Eliminado 'magazines'
+
+export const getFilteredContent = async (contentType: ContentType, userEmail: string): Promise<any[]> => {
+    try {
+        const userPreferences = await getPreferences(userEmail); // Obtener preferencias del usuario
+
+        if (!userPreferences || userPreferences.preferences.length === 0) {
+            // Si no hay preferencias, devolver los 10 últimos elementos del tipo de contenido
+            switch (contentType) {
+                case 'news': return (await getLatestNews()).slice(0, 10);
+                case 'weekly-summaries': return (await getLatestWeeklySummaries()).slice(0, 10);
+                case 'tiktoks': return (await getLatestTikToks()).slice(0, 10);
+                default: return [];
+            }
+        }
+
+        const preferredCareerNames = userPreferences.preferences.map(p => p.toLowerCase());
+
+        let allContent: any[] = [];
+        switch (contentType) {
+            case 'news': allContent = await getAllNews(); break;
+            case 'weekly-summaries': allContent = await getAllWeeklySummaries(); break;
+            case 'tiktoks': allContent = await getAllTikToks(); break;
+        }
+
+        const filteredContent = allContent.filter((item: any) => {
+            // Asumimos que todos los tipos de contenido tienen un campo 'title' para filtrar
+            const itemTitle = item.title ? item.title.toLowerCase() : '';
+            return preferredCareerNames.some(pref => itemTitle.includes(pref));
+        });
+
+        // Devolver los 10 primeros elementos filtrados
+        return filteredContent.slice(0, 10);
+
+    } catch (error) {
+        console.error(`Error al obtener contenido filtrado de tipo ${contentType} para ${userEmail}:`, error);
+        throw new Error(`No se pudieron obtener los ${contentType} filtrados.`);
+    }
+};
 export const getLatestTikToks = () => fetchData<ApiTikTok, ProcessedTikTok>('/10', processTikTokData);
 export const getAllTikToks = () => fetchData<ApiTikTok, ProcessedTikTok>('/11', processTikTokData);

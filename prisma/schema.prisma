@@ -23,13 +23,14 @@ model Usuario {
   // Relaciones
   deviceTokens DeviceToken[]
   preferencias PreferenciaUsuarioCarrera[]
+  userCodes    UserCode[] // AÑADIDO: Relación con los códigos de verificación
 }
 
 // Modelo para almacenar las carreras que vienen de la API externa.
 // Sirve para establecer las preferencias de los usuarios.
 model Carrera {
   id    Int    @id @default(autoincrement()) // ID interno de nuestra BD
-  apiId Int    @unique // El ID que viene de la API de UTEQ
+  apiId String @unique // CAMBIADO: Ahora es String para guardar crNombre
   nombre String
 
   // Relaciones
@@ -58,4 +59,20 @@ model DeviceToken {
   updatedAt DateTime @updatedAt
 
   @@index([usuarioId])
+}
+
+// AÑADIDO: Modelo para los códigos de verificación de usuario
+model UserCode {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  code       String
+  status     String   @default("active") // active, used, expired
+  expiryTime DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       Usuario  @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([code])
 }

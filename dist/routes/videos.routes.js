@@ -9,8 +9,10 @@ const videosRoutes = async (server) => {
     // Rutas para los resúmenes semanales
     server.get('/weekly-summaries/latest', videos_controller_1.handleGetLatestWeeklySummaries);
     server.get('/weekly-summaries/all', videos_controller_1.handleGetAllWeeklySummaries);
+    server.get('/weekly-summaries/filtered/:email', videos_controller_1.handleGetFilteredWeeklySummaries);
     // Rutas para los videos de TikTok
     server.get('/tiktoks/latest', videos_controller_1.handleGetLatestTikToks);
     server.get('/tiktoks/all', videos_controller_1.handleGetAllTikToks);
+    server.get('/tiktoks/filtered/:email', videos_controller_1.handleGetFilteredTikToks);
 };
 exports.default = videosRoutes;

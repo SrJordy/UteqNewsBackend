@@ -1,9 +1,11 @@
+
 import Fastify from 'fastify';
 import newsRoutes from './routes/news.routes';
 import videosRoutes from './routes/videos.routes';
 import magazineRoutes from './routes/magazine.routes';
 import facultyRoutes from './routes/faculty.routes';
 import careerRoutes from './routes/career.routes';
+import authRoutes from './routes/auth.routes';
 
 const server = Fastify({ logger: true });
 
@@ -13,6 +15,7 @@ server.get('/', async (request, reply) => {
 });
 
 // Registrar las rutas de la API
+server.register(authRoutes, { prefix: '/api/auth' });
 server.register(newsRoutes, { prefix: '/api/news' });
 server.register(videosRoutes, { prefix: '/api/videos' });
 server.register(magazineRoutes, { prefix: '/api/magazines' });

@@ -1,5 +1,6 @@
+
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { getLatestWeeklySummaries, getAllWeeklySummaries, getLatestTikToks, getAllTikToks } from '../services/uteqApi.service';
+import { getLatestWeeklySummaries, getAllWeeklySummaries, getLatestTikToks, getAllTikToks, getFilteredContent } from '../services/uteqApi.service';
 
 // --- Resúmenes Semanales ---
 
@@ -29,6 +30,29 @@ export const handleGetAllWeeklySummaries = async (request: FastifyRequest, reply
     }
 };
 
+/**
+ * Maneja la solicitud para obtener resúmenes semanales filtrados por las preferencias del usuario.
+ */
+export const handleGetFilteredWeeklySummaries = async (
+    request: FastifyRequest<{ Params: { email: string } }>,
+    reply: FastifyReply
+) => {
+    try {
+        const { email } = request.params;
+        if (!email) {
+            return reply.code(400).send({ error: 'El email del usuario es requerido para filtrar resúmenes semanales.' });
+        }
+        const filteredSummaries = await getFilteredContent('weekly-summaries', email);
+        return reply.code(200).send(filteredSummaries);
+    } catch (error: any) {
+        console.error('Controller Error: Fallo al obtener resúmenes semanales filtrados.', error);
+        if (error.message.includes('Usuario no encontrado')) {
+            return reply.code(404).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: 'Ocurrió un error en el servidor al obtener resúmenes semanales filtrados.' });
+    }
+};
+
 // --- TikToks ---
 
 /**
@@ -54,5 +78,28 @@ export const handleGetAllTikToks = async (request: FastifyRequest, reply: Fastif
     } catch (error) {
         console.error('Controller Error: Fallo al obtener todos los TikToks.', error);
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al procesar su solicitud.' });
+    }
+};
+
+/**
+ * Maneja la solicitud para obtener videos de TikTok filtrados por las preferencias del usuario.
+ */
+export const handleGetFilteredTikToks = async (
+    request: FastifyRequest<{ Params: { email: string } }>,
+    reply: FastifyReply
+) => {
+    try {
+        const { email } = request.params;
+        if (!email) {
+            return reply.code(400).send({ error: 'El email del usuario es requerido para filtrar TikToks.' });
+        }
+        const filteredTikToks = await getFilteredContent('tiktoks', email);
+        return reply.code(200).send(filteredTikToks);
+    } catch (error: any) {
+        console.error('Controller Error: Fallo al obtener TikToks filtrados.', error);
+        if (error.message.includes('Usuario no encontrado')) {
+            return reply.code(404).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: 'Ocurrió un error en el servidor al obtener TikToks filtrados.' });
     }
 };

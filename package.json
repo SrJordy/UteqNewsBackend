@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && xcopy /E /I /Y src\\generated dist\\generated",
     "start": "node dist/index.js"
   },
   "keywords": [],
@@ -15,10 +15,14 @@
   "dependencies": {
     "@prisma/client": "^6.16.1",
     "axios": "^1.12.2",
-    "fastify": "^5.6.0"
+    "bcryptjs": "^3.0.2",
+    "fastify": "^5.6.0",
+    "nodemailer": "^7.0.6"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^24.4.0",
+    "@types/nodemailer": "^7.0.1",
     "nodemon": "^3.1.10",
     "prisma": "^6.16.1",
     "tsx": "^4.20.5",
