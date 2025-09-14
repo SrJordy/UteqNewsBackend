@@ -1,9 +1,11 @@
+
 import { prisma } from '../lib/prisma';
 import * as bcrypt from 'bcryptjs';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput, PreferenceInput } from './auth.schemas';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, PreferenceInput, RequestPasswordResetInput, ResetPasswordInput } from './auth.schemas';
 import { sendVerificationEmail } from '../lib/mailer';
+import { v4 as uuidv4 } from 'uuid'; // Para generar tokens únicos
 
-// Función para generar un código de 6 dígitos
+// Función para generar un código de 6 dígitos (para verificación de email)
 const generateVerificationCode = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -271,4 +273,79 @@ export const getPreferences = async (email: string) => {
     const preferredCareers = user.preferencias.map(p => p.carrera.nombre);
 
     return { email: user.email, preferences: preferredCareers };
+};
+
+export const requestPasswordReset = async (email: string) => {
+    const user = await prisma.usuario.findUnique({
+        where: { email: email },
+    });
+
+    if (!user) {
+        throw new Error('Usuario no encontrado.');
+    }
+
+    const resetToken = uuidv4(); // Generar un token único
+    const expiryTime = new Date(Date.now() + 60 * 60 * 1000); // 1 hora de validez
+
+    // Eliminar tokens de reseteo de contraseña anteriores activos para este usuario
+    await prisma.userCode.deleteMany({
+        where: { userId: user.id, status: 'password_reset' },
+    });
+
+    await prisma.userCode.create({
+        data: {
+            userId: user.id,
+            code: resetToken,
+            expiryTime: expiryTime,
+            status: 'password_reset',
+        },
+    });
+
+    // Enviar correo con el token de reseteo
+    // Aquí deberías usar una plantilla de correo más adecuada para reseteo de contraseña
+    await sendVerificationEmail(user.email, `Tu código de reseteo de contraseña es: ${resetToken}. Es válido por 1 hora.`);
+
+    return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
+};
+
+export const resetPassword = async (input: ResetPasswordInput) => {
+    const user = await prisma.usuario.findUnique({
+        where: { email: input.email },
+    });
+
+    if (!user) {
+        throw new Error('Usuario no encontrado.');
+    }
+
+    const userCode = await prisma.userCode.findFirst({
+        where: {
+            userId: user.id,
+            code: input.token,
+            status: 'password_reset',
+            expiryTime: { gte: new Date() }, // Token no expirado
+        },
+        orderBy: { createdAt: 'desc' }, // Obtener el token más reciente
+    });
+
+    if (!userCode) {
+        throw new Error('Token de reseteo de contraseña inválido o expirado.');
+    }
+
+    // Hashear la nueva contraseña
+    const hashedPassword = await bcrypt.hash(input.newPassword, 10);
+
+    // Actualizar la contraseña del usuario
+    const updatedUser = await prisma.usuario.update({
+        where: { id: user.id },
+        data: { password: hashedPassword },
+    });
+
+    // Marcar el token como usado
+    await prisma.userCode.update({
+        where: { id: userCode.id },
+        data: { status: 'used' },
+    });
+
+    const { password, ...userWithoutPassword } = updatedUser;
+    return { ...userWithoutPassword, message: 'Contraseña restablecida exitosamente.' };
 };

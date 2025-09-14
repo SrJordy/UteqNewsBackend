@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPreferencesHandler = exports.removePreferenceHandler = exports.addPreferenceHandler = exports.updateHandler = exports.loginHandler = exports.verifyEmailHandler = exports.registerHandler = void 0;
+exports.resetPasswordHandler = exports.requestPasswordResetHandler = exports.getPreferencesHandler = exports.removePreferenceHandler = exports.addPreferenceHandler = exports.updateHandler = exports.loginHandler = exports.verifyEmailHandler = exports.registerHandler = void 0;
 const auth_service_1 = require("../services/auth.service");
 const registerHandler = async (request, reply) => {
     try {
@@ -108,3 +108,32 @@ const getPreferencesHandler = async (request, reply) => {
     }
 };
 exports.getPreferencesHandler = getPreferencesHandler;
+const requestPasswordResetHandler = async (request, reply) => {
+    try {
+        const { email } = request.body;
+        const result = await (0, auth_service_1.requestPasswordReset)(email);
+        return reply.code(200).send(result);
+    }
+    catch (error) {
+        console.error('Controller Error: Fallo al solicitar reseteo de contraseña.', error);
+        if (error.message.includes('Usuario no encontrado')) {
+            return reply.code(404).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: 'Ocurrió un error en el servidor al solicitar reseteo de contraseña.' });
+    }
+};
+exports.requestPasswordResetHandler = requestPasswordResetHandler;
+const resetPasswordHandler = async (request, reply) => {
+    try {
+        const result = await (0, auth_service_1.resetPassword)(request.body);
+        return reply.code(200).send(result);
+    }
+    catch (error) {
+        console.error('Controller Error: Fallo al resetear contraseña.', error);
+        if (error.message.includes('Usuario no encontrado') || error.message.includes('Token de reseteo de contraseña inválido o expirado')) {
+            return reply.code(400).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: 'Ocurrió un error en el servidor al resetear contraseña.' });
+    }
+};
+exports.resetPasswordHandler = resetPasswordHandler;

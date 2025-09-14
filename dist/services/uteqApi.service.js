@@ -3,9 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllTikToks = exports.getLatestTikToks = exports.getFilteredContent = exports.getCareersByFaculty = exports.getCareers = exports.getFaculties = exports.getAllMagazines = exports.getLatestMagazines = exports.getAllWeeklySummaries = exports.getLatestWeeklySummaries = exports.getAllNews = exports.getLatestNews = exports.uteqApiClient = exports.authenticate = void 0;
+exports.getFilteredContent = exports.getCareersByFaculty = exports.getAllTikToks = exports.getLatestTikToks = exports.getCareers = exports.getFaculties = exports.getAllMagazines = exports.getLatestMagazines = exports.getAllWeeklySummaries = exports.getLatestWeeklySummaries = exports.getAllNews = exports.getLatestNews = exports.uteqApiClient = exports.authenticate = void 0;
 const axios_1 = __importDefault(require("axios"));
 const https_1 = __importDefault(require("https"));
+const node_cache_1 = __importDefault(require("node-cache"));
 const auth_service_1 = require("./auth.service");
 // --- Configuración de la API de UTEQ ---
 const UTEQ_API_BASE_URL = 'https://apiws.uteq.edu.ec/h6RPoSoRaah0Y4Bah28eew';
@@ -22,6 +23,8 @@ const TIKTOK_COVER_URL = 'https://www.uteq.edu.ec/assets/img/portada-tiktok-vide
 // AGENTE PARA IGNORAR ERRORES DE CERTIFICADO SSL (SOLO PARA DESARROLLO)
 const insecureAgent = new https_1.default.Agent({ rejectUnauthorized: false });
 let accessToken = null;
+// --- CACHÉ --- (TTL de 10 minutos por defecto)
+const cache = new node_cache_1.default({ stdTTL: 600 });
 // --- AUTENTICACIÓN ---
 const authenticate = async () => {
     if (accessToken)
@@ -58,15 +61,27 @@ const processMagazineData = (magazines) => magazines.map(item => ({ year: item.a
 const processFacultyData = (faculties) => faculties.map(item => ({ id: item.dpCodigo, name: item.dpNombre, mission: item.dpMision, vision: item.dpVision, videoUrl: item.dpUrlVideo, facebookUrl: item.dpCtaFacb, color: item.dpColor, facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl}` }));
 const processCareerData = (careers) => careers.map(item => ({ name: item.crNombre, description: item.crCampoOcupc, careerUrl: `${CAREER_URL_PREFIX}${item.crUrlParcial}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${item.crUrlImgRS}` }));
 const processTikTokData = (tiktoks) => tiktoks.map(item => ({ date: item.fechapub, title: item.titulo, videoUrl: item.urlvideo1, coverUrl: TIKTOK_COVER_URL }));
-// --- SERVICIOS ---
-const fetchData = async (endpoint, processor) => { try {
-    const response = await exports.uteqApiClient.get(endpoint);
-    return processor(response.data);
-}
-catch (error) {
-    console.error(`Error al obtener datos del endpoint ${endpoint}:`, error);
-    throw new Error(`No se pudieron obtener los datos del endpoint ${endpoint}.`);
-} };
+// --- SERVICIOS DE OBTENCIÓN DE DATOS (CON CACHÉ) ---
+const fetchData = async (endpoint, processor) => {
+    const cacheKey = `api_data_${endpoint}`;
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+        console.log(`Cache hit for ${cacheKey}`);
+        return cachedData;
+    }
+    try {
+        const response = await exports.uteqApiClient.get(endpoint);
+        const processedData = processor(response.data);
+        cache.set(cacheKey, processedData);
+        console.log(`Cache set for ${cacheKey}`);
+        return processedData;
+    }
+    catch (error) {
+        console.error(`Error al obtener datos del endpoint ${endpoint}:`, error);
+        throw new Error(`No se pudieron obtener los datos del endpoint ${endpoint}.`);
+    }
+};
+// Exportar todas las funciones de servicio que usan fetchData
 const getLatestNews = () => fetchData('/1', processNewsData);
 exports.getLatestNews = getLatestNews;
 const getAllNews = () => fetchData('/2', processNewsData);
@@ -83,14 +98,29 @@ const getFaculties = () => fetchData('/7', processFacultyData);
 exports.getFaculties = getFaculties;
 const getCareers = () => fetchData('/8', processCareerData);
 exports.getCareers = getCareers;
-const getCareersByFaculty = async (facultyId) => { try {
-    const response = await exports.uteqApiClient.get(`/9/${facultyId}`);
-    return processCareerData(response.data);
-}
-catch (error) {
-    console.error(`Error al obtener las carreras para la facultad ${facultyId}:`, error);
-    throw new Error('No se pudieron obtener las carreras para la facultad especificada.');
-} };
+const getLatestTikToks = () => fetchData('/10', processTikTokData);
+exports.getLatestTikToks = getLatestTikToks;
+const getAllTikToks = () => fetchData('/11', processTikTokData);
+exports.getAllTikToks = getAllTikToks;
+const getCareersByFaculty = async (facultyId) => {
+    const cacheKey = `careers_by_faculty_${facultyId}`;
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+        console.log(`Cache hit for ${cacheKey}`);
+        return cachedData;
+    }
+    try {
+        const response = await exports.uteqApiClient.get(`/9/${facultyId}`);
+        const processedData = processCareerData(response.data);
+        cache.set(cacheKey, processedData);
+        console.log(`Cache set for ${cacheKey}`);
+        return processedData;
+    }
+    catch (error) {
+        console.error(`Error al obtener las carreras para la facultad ${facultyId}:`, error);
+        throw new Error('No se pudieron obtener las carreras para la facultad especificada.');
+    }
+};
 exports.getCareersByFaculty = getCareersByFaculty;
 const getFilteredContent = async (contentType, userEmail) => {
     try {
@@ -134,7 +164,3 @@ const getFilteredContent = async (contentType, userEmail) => {
     }
 };
 exports.getFilteredContent = getFilteredContent;
-const getLatestTikToks = () => fetchData('/10', processTikTokData);
-exports.getLatestTikToks = getLatestTikToks;
-const getAllTikToks = () => fetchData('/11', processTikTokData);
-exports.getAllTikToks = getAllTikToks;

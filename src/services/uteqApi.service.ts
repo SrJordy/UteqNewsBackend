@@ -1,6 +1,7 @@
 
 import axios from 'axios';
 import https from 'https';
+import NodeCache from 'node-cache';
 import { getPreferences } from './auth.service';
 
 // --- Configuración de la API de UTEQ ---
@@ -21,6 +22,9 @@ const TIKTOK_COVER_URL = 'https://www.uteq.edu.ec/assets/img/portada-tiktok-vide
 const insecureAgent = new https.Agent({ rejectUnauthorized: false });
 
 let accessToken: string | null = null;
+
+// --- CACHÉ --- (TTL de 10 minutos por defecto)
+const cache = new NodeCache({ stdTTL: 600 });
 
 // --- AUTENTICACIÓN ---
 export const authenticate = async (): Promise<string> => {
@@ -72,9 +76,28 @@ const processFacultyData = (faculties: ApiFaculty[]): ProcessedFaculty[] => facu
 const processCareerData = (careers: ApiCareer[]): ProcessedCareer[] => careers.map(item => ({ name: item.crNombre, description: item.crCampoOcupc, careerUrl: `${CAREER_URL_PREFIX}${item.crUrlParcial}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${item.crUrlImgRS}` }));
 const processTikTokData = (tiktoks: ApiTikTok[]): ProcessedTikTok[] => tiktoks.map(item => ({ date: item.fechapub, title: item.titulo, videoUrl: item.urlvideo1, coverUrl: TIKTOK_COVER_URL }));
 
-// --- SERVICIOS ---
-const fetchData = async <T, U>(endpoint: string, processor: (data: T[]) => U[]): Promise<U[]> => { try { const response = await uteqApiClient.get<T[]>(endpoint); return processor(response.data); } catch (error) { console.error(`Error al obtener datos del endpoint ${endpoint}:`, error); throw new Error(`No se pudieron obtener los datos del endpoint ${endpoint}.`); } };
+// --- SERVICIOS DE OBTENCIÓN DE DATOS (CON CACHÉ) ---
+const fetchData = async <T, U>(endpoint: string, processor: (data: T[]) => U[]): Promise<U[]> => {
+    const cacheKey = `api_data_${endpoint}`;
+    const cachedData = cache.get<U[]>(cacheKey);
+    if (cachedData) {
+        console.log(`Cache hit for ${cacheKey}`);
+        return cachedData;
+    }
 
+    try {
+        const response = await uteqApiClient.get<T[]>(endpoint);
+        const processedData = processor(response.data);
+        cache.set(cacheKey, processedData);
+        console.log(`Cache set for ${cacheKey}`);
+        return processedData;
+    } catch (error) {
+        console.error(`Error al obtener datos del endpoint ${endpoint}:`, error);
+        throw new Error(`No se pudieron obtener los datos del endpoint ${endpoint}.`);
+    }
+};
+
+// Exportar todas las funciones de servicio que usan fetchData
 export const getLatestNews = () => fetchData<ApiNews, ProcessedNews>('/1', processNewsData);
 export const getAllNews = () => fetchData<ApiNews, ProcessedNews>('/2', processNewsData);
 export const getLatestWeeklySummaries = () => fetchData<ApiWeeklySummary, ProcessedWeeklySummary>('/3', processWeeklySummaryData);
@@ -83,7 +106,28 @@ export const getLatestMagazines = () => fetchData<ApiMagazine, ProcessedMagazine
 export const getAllMagazines = () => fetchData<ApiMagazine, ProcessedMagazine>('/6', processMagazineData);
 export const getFaculties = () => fetchData<ApiFaculty, ProcessedFaculty>('/7', processFacultyData);
 export const getCareers = () => fetchData<ApiCareer, ProcessedCareer>('/8', processCareerData);
-export const getCareersByFaculty = async (facultyId: string): Promise<ProcessedCareer[]> => { try { const response = await uteqApiClient.get<ApiCareer[]>(`/9/${facultyId}`); return processCareerData(response.data); } catch (error) { console.error(`Error al obtener las carreras para la facultad ${facultyId}:`, error); throw new Error('No se pudieron obtener las carreras para la facultad especificada.'); } };
+export const getLatestTikToks = () => fetchData<ApiTikTok, ProcessedTikTok>('/10', processTikTokData);
+export const getAllTikToks = () => fetchData<ApiTikTok, ProcessedTikTok>('/11', processTikTokData);
+
+export const getCareersByFaculty = async (facultyId: string): Promise<ProcessedCareer[]> => {
+    const cacheKey = `careers_by_faculty_${facultyId}`;
+    const cachedData = cache.get<ProcessedCareer[]>(cacheKey);
+    if (cachedData) {
+        console.log(`Cache hit for ${cacheKey}`);
+        return cachedData;
+    }
+
+    try {
+        const response = await uteqApiClient.get<ApiCareer[]>(`/9/${facultyId}`);
+        const processedData = processCareerData(response.data);
+        cache.set(cacheKey, processedData);
+        console.log(`Cache set for ${cacheKey}`);
+        return processedData;
+    } catch (error) {
+        console.error(`Error al obtener las carreras para la facultad ${facultyId}:`, error);
+        throw new Error('No se pudieron obtener las carreras para la facultad especificada.');
+    }
+};
 
 // --- SERVICIO DE FILTRADO GENERALIZADO ---
 type ContentType = 'news' | 'weekly-summaries' | 'tiktoks';
@@ -129,5 +173,3 @@ export const getFilteredContent = async (contentType: ContentType, userEmail: st
         throw new Error(`No se pudieron obtener los ${contentType} filtrados.`);
     }
 };
-export const getLatestTikToks = () => fetchData<ApiTikTok, ProcessedTikTok>('/10', processTikTokData);
-export const getAllTikToks = () => fetchData<ApiTikTok, ProcessedTikTok>('/11', processTikTokData);

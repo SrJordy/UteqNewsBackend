@@ -14,5 +14,8 @@ const authRoutes = async (server) => {
     server.post('/preferences/add', auth_controller_1.addPreferenceHandler);
     server.post('/preferences/remove', auth_controller_1.removePreferenceHandler);
     server.get('/preferences/:email', auth_controller_1.getPreferencesHandler);
+    // Rutas para reseteo de contraseña
+    server.post('/password/request-reset', auth_controller_1.requestPasswordResetHandler);
+    server.post('/password/reset', auth_controller_1.resetPasswordHandler);
 };
 exports.default = authRoutes;

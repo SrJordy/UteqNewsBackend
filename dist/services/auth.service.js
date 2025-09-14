@@ -33,11 +33,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPreferences = exports.removePreference = exports.addPreference = exports.updateUser = exports.loginUser = exports.verifyEmail = exports.registerUser = void 0;
+exports.resetPassword = exports.requestPasswordReset = exports.getPreferences = exports.removePreference = exports.addPreference = exports.updateUser = exports.loginUser = exports.verifyEmail = exports.registerUser = void 0;
 const prisma_1 = require("../lib/prisma");
 const bcrypt = __importStar(require("bcryptjs"));
 const mailer_1 = require("../lib/mailer");
-// Función para generar un código de 6 dígitos
+const uuid_1 = require("uuid"); // Para generar tokens únicos
+// Función para generar un código de 6 dígitos (para verificación de email)
 const generateVerificationCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
@@ -267,3 +268,65 @@ const getPreferences = async (email) => {
     return { email: user.email, preferences: preferredCareers };
 };
 exports.getPreferences = getPreferences;
+const requestPasswordReset = async (email) => {
+    const user = await prisma_1.prisma.usuario.findUnique({
+        where: { email: email },
+    });
+    if (!user) {
+        throw new Error('Usuario no encontrado.');
+    }
+    const resetToken = (0, uuid_1.v4)(); // Generar un token único
+    const expiryTime = new Date(Date.now() + 60 * 60 * 1000); // 1 hora de validez
+    // Eliminar tokens de reseteo de contraseña anteriores activos para este usuario
+    await prisma_1.prisma.userCode.deleteMany({
+        where: { userId: user.id, status: 'password_reset' },
+    });
+    await prisma_1.prisma.userCode.create({
+        data: {
+            userId: user.id,
+            code: resetToken,
+            expiryTime: expiryTime,
+            status: 'password_reset',
+        },
+    });
+    // Enviar correo con el token de reseteo
+    // Aquí deberías usar una plantilla de correo más adecuada para reseteo de contraseña
+    await (0, mailer_1.sendVerificationEmail)(user.email, `Tu código de reseteo de contraseña es: ${resetToken}. Es válido por 1 hora.`);
+    return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
+};
+exports.requestPasswordReset = requestPasswordReset;
+const resetPassword = async (input) => {
+    const user = await prisma_1.prisma.usuario.findUnique({
+        where: { email: input.email },
+    });
+    if (!user) {
+        throw new Error('Usuario no encontrado.');
+    }
+    const userCode = await prisma_1.prisma.userCode.findFirst({
+        where: {
+            userId: user.id,
+            code: input.token,
+            status: 'password_reset',
+            expiryTime: { gte: new Date() }, // Token no expirado
+        },
+        orderBy: { createdAt: 'desc' }, // Obtener el token más reciente
+    });
+    if (!userCode) {
+        throw new Error('Token de reseteo de contraseña inválido o expirado.');
+    }
+    // Hashear la nueva contraseña
+    const hashedPassword = await bcrypt.hash(input.newPassword, 10);
+    // Actualizar la contraseña del usuario
+    const updatedUser = await prisma_1.prisma.usuario.update({
+        where: { id: user.id },
+        data: { password: hashedPassword },
+    });
+    // Marcar el token como usado
+    await prisma_1.prisma.userCode.update({
+        where: { id: userCode.id },
+        data: { status: 'used' },
+    });
+    const { password, ...userWithoutPassword } = updatedUser;
+    return { ...userWithoutPassword, message: 'Contraseña restablecida exitosamente.' };
+};
+exports.resetPassword = resetPassword;

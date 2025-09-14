@@ -1,7 +1,6 @@
-
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { registerUser, verifyEmail, loginUser, updateUser, addPreference, removePreference, getPreferences } from '../services/auth.service';
-import { RegisterUserInput, LoginUserInput, UpdateUserInput, PreferenceInput } from '../services/auth.schemas';
+import { registerUser, verifyEmail, loginUser, updateUser, addPreference, removePreference, getPreferences, requestPasswordReset, resetPassword } from '../services/auth.service';
+import { RegisterUserInput, LoginUserInput, UpdateUserInput, PreferenceInput, RequestPasswordResetInput, ResetPasswordInput } from '../services/auth.schemas';
 
 export const registerHandler = async (
     request: FastifyRequest<{ Body: RegisterUserInput }>,
@@ -120,5 +119,38 @@ export const getPreferencesHandler = async (
             return reply.code(404).send({ error: error.message });
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al obtener las preferencias.' });
+    }
+};
+
+export const requestPasswordResetHandler = async (
+    request: FastifyRequest<{ Body: RequestPasswordResetInput }>,
+    reply: FastifyReply
+) => {
+    try {
+        const { email } = request.body;
+        const result = await requestPasswordReset(email);
+        return reply.code(200).send(result);
+    } catch (error: any) {
+        console.error('Controller Error: Fallo al solicitar reseteo de contraseña.', error);
+        if (error.message.includes('Usuario no encontrado')) {
+            return reply.code(404).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: 'Ocurrió un error en el servidor al solicitar reseteo de contraseña.' });
+    }
+};
+
+export const resetPasswordHandler = async (
+    request: FastifyRequest<{ Body: ResetPasswordInput }>,
+    reply: FastifyReply
+) => {
+    try {
+        const result = await resetPassword(request.body);
+        return reply.code(200).send(result);
+    } catch (error: any) {
+        console.error('Controller Error: Fallo al resetear contraseña.', error);
+        if (error.message.includes('Usuario no encontrado') || error.message.includes('Token de reseteo de contraseña inválido o expirado')) {
+            return reply.code(400).send({ error: error.message });
+        }
+        return reply.code(500).send({ error: 'Ocurrió un error en el servidor al resetear contraseña.' });
     }
 };

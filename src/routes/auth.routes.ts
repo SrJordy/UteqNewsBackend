@@ -1,6 +1,5 @@
-
 import { FastifyInstance } from 'fastify';
-import { registerHandler, verifyEmailHandler, loginHandler, updateHandler, addPreferenceHandler, removePreferenceHandler, getPreferencesHandler } from '../controllers/auth.controller';
+import { registerHandler, verifyEmailHandler, loginHandler, updateHandler, addPreferenceHandler, removePreferenceHandler, getPreferencesHandler, requestPasswordResetHandler, resetPasswordHandler } from '../controllers/auth.controller';
 
 /**
  * Registra las rutas de autenticación (registro, login, etc.)
@@ -16,6 +15,10 @@ const authRoutes = async (server: FastifyInstance) => {
     server.post('/preferences/add', addPreferenceHandler);
     server.post('/preferences/remove', removePreferenceHandler);
     server.get('/preferences/:email', getPreferencesHandler);
+
+    // Rutas para reseteo de contraseña
+    server.post('/password/request-reset', requestPasswordResetHandler);
+    server.post('/password/reset', resetPasswordHandler);
 };
 
 export default authRoutes;
