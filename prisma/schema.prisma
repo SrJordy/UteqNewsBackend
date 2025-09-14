@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../dev.db"
+}
+
+// Modelo para los usuarios de la aplicación
+model Usuario {
+  id         Int      @id @default(autoincrement())
+  nombre     String
+  apellido   String
+  email      String   @unique
+  password   String // Se guardará hasheada
+  rol        String?  // Ejemplo: 'estudiante', 'admin'
+  verificado Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relaciones
+  deviceTokens DeviceToken[]
+  preferencias PreferenciaUsuarioCarrera[]
+}
+
+// Modelo para almacenar las carreras que vienen de la API externa.
+// Sirve para establecer las preferencias de los usuarios.
+model Carrera {
+  id    Int    @id @default(autoincrement()) // ID interno de nuestra BD
+  apiId Int    @unique // El ID que viene de la API de UTEQ
+  nombre String
+
+  // Relaciones
+  usuariosConPreferencia PreferenciaUsuarioCarrera[]
+}
+
+// Tabla intermedia para la relación muchos-a-muchos de las preferencias
+model PreferenciaUsuarioCarrera {
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  carrera   Carrera @relation(fields: [carreraId], references: [id])
+  carreraId Int
+  createdAt DateTime @default(now())
+
+  @@id([usuarioId, carreraId])
+  @@index([carreraId])
+}
+
+// Modelo para los tokens de los dispositivos para notificaciones push
+model DeviceToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([usuarioId])
+}

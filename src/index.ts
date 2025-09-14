@@ -1,0 +1,33 @@
+import Fastify from 'fastify';
+import newsRoutes from './routes/news.routes';
+import videosRoutes from './routes/videos.routes';
+import magazineRoutes from './routes/magazine.routes';
+import facultyRoutes from './routes/faculty.routes';
+import careerRoutes from './routes/career.routes';
+
+const server = Fastify({ logger: true });
+
+// Ruta principal para verificar el estado del servidor
+server.get('/', async (request, reply) => {
+  return { status: 'ok', message: 'Servidor UTEQNewsBackend funcionando' };
+});
+
+// Registrar las rutas de la API
+server.register(newsRoutes, { prefix: '/api/news' });
+server.register(videosRoutes, { prefix: '/api/videos' });
+server.register(magazineRoutes, { prefix: '/api/magazines' });
+server.register(facultyRoutes, { prefix: '/api/faculties' });
+server.register(careerRoutes, { prefix: '/api/careers' });
+
+
+const start = async () => {
+  try {
+    await server.listen({ port: 3000 });
+    server.log.info('🚀 Servidor corriendo en http://localhost:3000');
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+};
+
+start();
