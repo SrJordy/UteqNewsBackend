@@ -55,26 +55,45 @@ uteqApiClient.interceptors.request.use(async (config) => {
 }, (error) => Promise.reject(error));
 
 // --- TIPOS DE DATOS ---
-interface ApiNews { ntUrlPortada: string; ntTitular: string; ntUrlNoticia: string; ntFecha: string; objDepartamento?: { dpNombre: string; }; objCategoriaNotc?: { gtTitular: string; gtColorIdentf: string; }; }
+// --- TIPOS DE DATOS ---
+interface ApiNews { ntUrlPortada?: string | null; ntTitular?: string | null; ntUrlNoticia?: string | null; ntFecha?: string | null; objDepartamento?: { dpNombre?: string | null; }; objCategoriaNotc?: { gtTitular?: string | null; gtColorIdentf?: string | null; }; }
 export interface ProcessedNews { id: string; title: string; date: string; newsUrl: string; coverUrl: string; departmentName?: string; categoryName?: string; categoryColor?: string; }
-interface ApiWeeklySummary { fechapub: string; titulo: string; urlvideo1: string; portadaVideo: string; }
+interface ApiWeeklySummary { fechapub?: string | null; titulo?: string | null; urlvideo1?: string | null; portadaVideo?: string | null; }
 export interface ProcessedWeeklySummary { title: string; videoUrl: string; coverUrl: string; date: string; }
-interface ApiMagazine { anio: number; mes: number; urlportada: string; urlpw: string; }
+interface ApiMagazine { anio?: number | null; mes?: number | null; urlportada?: string | null; urlpw?: string | null; }
 export interface ProcessedMagazine { year: number; month: number; coverUrl: string; pdfUrl: string; }
-interface ApiFaculty { dpCodigo: string; dpNombre: string; dpMision: string | null; dpVision: string | null; dpUrlVideo: string; dpCtaFacb: string; dpColor: string; dpParcialUrl: string; }
+interface ApiFaculty { dpCodigo?: string | null; dpNombre?: string | null; dpMision?: string | null; dpVision?: string | null; dpUrlVideo?: string | null; dpCtaFacb?: string | null; dpColor?: string | null; dpParcialUrl?: string | null; }
 export interface ProcessedFaculty { id: string; name: string; mission: string | null; vision: string | null; videoUrl: string; facebookUrl: string; color: string; facultyUrl: string; }
-interface ApiCareer { crNombre: string; crCampoOcupc: string; crUrlParcial: string; crUrlImgRS: string; }
+interface ApiCareer { crNombre?: string | null; crCampoOcupc?: string | null; crUrlParcial?: string | null; crUrlImgRS?: string | null; }
 export interface ProcessedCareer { name: string; description: string; careerUrl: string; imageUrl: string; }
-interface ApiTikTok { fechapub: string; titulo: string; urlvideo1: string; portadaVideo: string | null; }
+interface ApiTikTok { fechapub?: string | null; titulo?: string | null; urlvideo1?: string | null; portadaVideo?: string | null; }
 export interface ProcessedTikTok { date: string; title: string; videoUrl: string; coverUrl: string; }
 
 // --- PROCESADORES DE DATOS ---
-const processNewsData = (news: ApiNews[]): ProcessedNews[] => news.map(item => ({ id: item.ntTitular, title: item.ntTitular, date: item.ntFecha, newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia}`, coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada}`, departmentName: item.objDepartamento?.dpNombre, categoryName: item.objCategoriaNotc?.gtTitular, categoryColor: item.objCategoriaNotc?.gtColorIdentf, }));
-const processWeeklySummaryData = (summaries: ApiWeeklySummary[]): ProcessedWeeklySummary[] => summaries.map(item => ({ title: item.titulo, videoUrl: item.urlvideo1, coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${item.portadaVideo}`, date: item.fechapub }));
-const processMagazineData = (magazines: ApiMagazine[]): ProcessedMagazine[] => magazines.map(item => ({ year: item.anio, month: item.mes, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${item.urlportada}`, pdfUrl: item.urlpw }));
-const processFacultyData = (faculties: ApiFaculty[]): ProcessedFaculty[] => faculties.map(item => ({ id: item.dpCodigo, name: item.dpNombre, mission: item.dpMision, vision: item.dpVision, videoUrl: item.dpUrlVideo, facebookUrl: item.dpCtaFacb, color: item.dpColor, facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl}` }));
-const processCareerData = (careers: ApiCareer[]): ProcessedCareer[] => careers.map(item => ({ name: item.crNombre, description: item.crCampoOcupc, careerUrl: `${CAREER_URL_PREFIX}${item.crUrlParcial}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${item.crUrlImgRS}` }));
-const processTikTokData = (tiktoks: ApiTikTok[]): ProcessedTikTok[] => tiktoks.map(item => ({ date: item.fechapub, title: item.titulo, videoUrl: item.urlvideo1, coverUrl: TIKTOK_COVER_URL }));
+const processNewsData = (news: ApiNews[]): ProcessedNews[] => news.map(item => ({
+    id: item.ntTitular ?? '',
+    title: item.ntTitular ?? '',
+    date: item.ntFecha ?? '',
+    newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia ?? ''}`,
+    coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada ?? ''}`,
+    departmentName: item.objDepartamento?.dpNombre ?? undefined,
+    categoryName: item.objCategoriaNotc?.gtTitular ?? undefined,
+    categoryColor: item.objCategoriaNotc?.gtColorIdentf ?? undefined,
+}));
+const processWeeklySummaryData = (summaries: ApiWeeklySummary[]): ProcessedWeeklySummary[] => summaries.map(item => ({ title: item.titulo ?? '', videoUrl: item.urlvideo1 ?? '', coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${item.portadaVideo ?? ''}`, date: item.fechapub ?? '' }));
+const processMagazineData = (magazines: ApiMagazine[]): ProcessedMagazine[] => magazines.map(item => ({ year: item.anio ?? 0, month: item.mes ?? 0, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${item.urlportada ?? ''}`, pdfUrl: item.urlpw ?? '' }));
+const processFacultyData = (faculties: ApiFaculty[]): ProcessedFaculty[] => faculties.map(item => ({
+    id: item.dpCodigo ?? '',
+    name: item.dpNombre ?? '',
+    mission: item.dpMision ?? null,
+    vision: item.dpVision ?? null,
+    videoUrl: item.dpUrlVideo ?? '',
+    facebookUrl: item.dpCtaFacb ?? '',
+    color: item.dpColor ?? '#4CAF50',
+    facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl ?? ''}`
+}));
+const processCareerData = (careers: ApiCareer[]): ProcessedCareer[] => careers.map(item => ({ name: item.crNombre ?? '', description: item.crCampoOcupc ?? '', careerUrl: `${CAREER_URL_PREFIX}${item.crUrlParcial ?? ''}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${item.crUrlImgRS ?? ''}` }));
+const processTikTokData = (tiktoks: ApiTikTok[]): ProcessedTikTok[] => tiktoks.map(item => ({ date: item.fechapub ?? '', title: item.titulo ?? '', videoUrl: item.urlvideo1 ?? '', coverUrl: TIKTOK_COVER_URL }));
 
 // --- SERVICIOS DE OBTENCIÓN DE DATOS (CON CACHÉ) ---
 const fetchData = async <T, U>(endpoint: string, processor: (data: T[]) => U[]): Promise<U[]> => {
