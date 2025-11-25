@@ -2,23 +2,24 @@ import axios from 'axios';
 import { getCareers } from './uteqApi.service';
 import { getFaculties } from './uteqApi.service';
 
-// Asegúrate de que la API Key esté en tus variables de entorno
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+// Configuración de OpenRouter
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.GOOGLE_API_KEY; // Fallback por si el usuario usa la misma variable
+const SITE_URL = 'https://uteq.edu.ec';
+const APP_NAME = 'UTEQ News App';
 
-if (!GOOGLE_API_KEY) {
-    throw new Error('GOOGLE_API_KEY no está definida en las variables de entorno.');
+if (!OPENROUTER_API_KEY) {
+    console.warn('ADVERTENCIA: OPENROUTER_API_KEY no está definida. El chat de IA no funcionará correctamente.');
 }
 
 /**
  * Pregunta a la IA sobre una entidad (carrera o facultad) específica.
  * @param type - Tipo de entidad ('career' o 'faculty').
- * @param name - Nombre de la carrera o facultad.
+ * @param name - Nombre de la carrera o facultad (opcional).
  * @param question - La pregunta del usuario.
  * @returns La respuesta de la IA.
  */
-export const askAI = async (type: 'career' | 'faculty', name: string, question: string): Promise<string> => {
+export const askAI = async (type: 'career' | 'faculty', name: string | undefined, question: string): Promise<string> => {
     let context = '';
-    let entityData: any;
 
     // Construcción del contexto (se hace una sola vez)
     try {
@@ -73,28 +74,32 @@ export const askAI = async (type: 'career' | 'faculty', name: string, question: 
 
         if (type === 'career') {
             const careers = await getCareers();
-            const entityData = findBestMatch(name, careers);
+            // Si hay nombre, buscar por nombre. Si no, buscar en la pregunta.
+            const targetName = name && name.trim().length > 0 ? name : question;
+            const entityData = findBestMatch(targetName, careers);
 
             if (entityData) {
                 context = `Información sobre la carrera ${entityData.name}: Campo Ocupacional: ${entityData.description}. URL: ${entityData.careerUrl}.`;
             } else {
                 // Si no se encuentra o el nombre es genérico, listar las carreras disponibles
                 const careerList = careers.map(c => c.name).join(', ');
-                context = `El usuario está preguntando sobre carreras pero no especificó una válida o no se encontró la carrera "${name}". 
+                context = `El usuario está preguntando sobre carreras pero no se especificó una válida o no se encontró coincidencia para "${targetName}". 
                 Lista de carreras disponibles en la UTEQ: ${careerList}. 
                 Si el usuario pregunta "¿qué carreras hay?" o similar, muéstrale esta lista. 
                 Si intentó buscar una carrera y no la encontraste, sugiere la más parecida de la lista.`;
             }
         } else if (type === 'faculty') {
             const faculties = await getFaculties();
-            const entityData = findBestMatch(name, faculties);
+            // Si hay nombre, buscar por nombre. Si no, buscar en la pregunta.
+            const targetName = name && name.trim().length > 0 ? name : question;
+            const entityData = findBestMatch(targetName, faculties);
 
             if (entityData) {
                 context = `Información sobre la facultad ${entityData.name}: Misión: ${entityData.mission}. Visión: ${entityData.vision}. URL Video: ${entityData.videoUrl}. Facebook: ${entityData.facebookUrl}.`;
             } else {
                 // Si no se encuentra o el nombre es genérico, listar las facultades disponibles
                 const facultyList = faculties.map(f => f.name).join(', ');
-                context = `El usuario está preguntando sobre facultades pero no especificó una válida o no se encontró la facultad "${name}". 
+                context = `El usuario está preguntando sobre facultades pero no se especificó una válida o no se encontró coincidencia para "${targetName}". 
                 Lista de facultades disponibles en la UTEQ: ${facultyList}. 
                 Si el usuario pregunta "¿qué facultades hay?" o similar, muéstrale esta lista.
                 Si intentó buscar una facultad y no la encontraste, sugiere la más parecida de la lista.`;
@@ -106,38 +111,51 @@ export const askAI = async (type: 'career' | 'faculty', name: string, question: 
     }
 
     try {
-        const prompt = `Eres un asistente de la Universidad Técnica Estatal de Quevedo (UTEQ). Responde preguntas sobre carreras y facultades basándote en la información proporcionada. Si la pregunta no está relacionada con la UTEQ o la información proporcionada, responde que no puedes ayudar con eso.
+        const prompt = `Eres un asistente de la Universidad Técnica Estatal de Quevedo (UTEQ). Responde preguntas sobre carreras y facultades basándote en la información proporcionada. 
+        IMPORTANTE: TODAS tus respuestas deben ser estrictamente en ESPAÑOL.
+        Si la pregunta no está relacionada con la UTEQ o la información proporcionada, responde que no puedes ayudar con eso.
         
         Contexto Adicional: ${context}
         
         Pregunta del Usuario: ${question}`;
 
-        console.log(`Consultando a Google Gemini (gemini-3-pro-preview) vía REST...`);
+        console.log(`Consultando a OpenRouter (tngtech/deepseek-r1t-chimera:free)...`);
 
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent`,
+            'https://openrouter.ai/api/v1/chat/completions',
             {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
+                model: 'tngtech/deepseek-r1t-chimera:free',
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ]
             },
             {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'x-goog-api-key': GOOGLE_API_KEY
+                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                    'HTTP-Referer': SITE_URL,
+                    'X-Title': APP_NAME,
+                    'Content-Type': 'application/json'
                 }
             }
         );
 
-        const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        const text = response.data?.choices?.[0]?.message?.content;
 
         if (text) {
-            console.log(`Éxito con Gemini REST.`);
+            console.log(`Éxito con OpenRouter.`);
             return text;
         }
     } catch (error: any) {
-        console.error(`Fallo con Google Gemini REST:`, error.response?.data || error.message || error);
-        return "Lo siento, no pude conectar con el servicio de inteligencia de Google. Por favor verifica tu conexión o intenta más tarde.";
+        console.error(`Fallo con OpenRouter:`, error.response?.data || error.message || error);
+
+        if (error.response?.status === 401) {
+            return "Error de autenticación: Verifica tu OPENROUTER_API_KEY.";
+        }
+
+        return "Lo siento, no pude conectar con el servicio de inteligencia. Por favor intenta más tarde.";
     }
 
     return "No se pudo generar una respuesta.";

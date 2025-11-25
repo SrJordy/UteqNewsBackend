@@ -4,7 +4,7 @@ import { askAI } from '../services/ai.service';
 
 interface AskAIInput {
     type: 'career' | 'faculty';
-    name: string;
+    name?: string;
     question: string;
 }
 
@@ -15,8 +15,8 @@ export const askAIHandler = async (
     try {
         const { type, name, question } = request.body;
 
-        if (!type || !name || !question) {
-            return reply.code(400).send({ error: 'Faltan parámetros: type, name y question son requeridos.' });
+        if (!type || !question) {
+            return reply.code(400).send({ error: 'Faltan parámetros: type y question son requeridos.' });
         }
 
         const aiResponse = await askAI(type, name, question);

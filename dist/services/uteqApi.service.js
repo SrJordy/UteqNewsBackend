@@ -55,12 +55,30 @@ exports.uteqApiClient.interceptors.request.use(async (config) => {
     return config;
 }, (error) => Promise.reject(error));
 // --- PROCESADORES DE DATOS ---
-const processNewsData = (news) => news.map(item => ({ id: item.ntTitular, title: item.ntTitular, date: item.ntFecha, newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia}`, coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada}`, departmentName: item.objDepartamento?.dpNombre, categoryName: item.objCategoriaNotc?.gtTitular, categoryColor: item.objCategoriaNotc?.gtColorIdentf, }));
-const processWeeklySummaryData = (summaries) => summaries.map(item => ({ title: item.titulo, videoUrl: item.urlvideo1, coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${item.portadaVideo}`, date: item.fechapub }));
-const processMagazineData = (magazines) => magazines.map(item => ({ year: item.anio, month: item.mes, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${item.urlportada}`, pdfUrl: item.urlpw }));
-const processFacultyData = (faculties) => faculties.map(item => ({ id: item.dpCodigo, name: item.dpNombre, mission: item.dpMision, vision: item.dpVision, videoUrl: item.dpUrlVideo, facebookUrl: item.dpCtaFacb, color: item.dpColor, facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl}` }));
-const processCareerData = (careers) => careers.map(item => ({ name: item.crNombre, description: item.crCampoOcupc, careerUrl: `${CAREER_URL_PREFIX}${item.crUrlParcial}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${item.crUrlImgRS}` }));
-const processTikTokData = (tiktoks) => tiktoks.map(item => ({ date: item.fechapub, title: item.titulo, videoUrl: item.urlvideo1, coverUrl: TIKTOK_COVER_URL }));
+const processNewsData = (news) => news.map(item => ({
+    id: item.ntTitular ?? '',
+    title: item.ntTitular ?? '',
+    date: item.ntFecha ?? '',
+    newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia ?? ''}`,
+    coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada ?? ''}`,
+    departmentName: item.objDepartamento?.dpNombre ?? undefined,
+    categoryName: item.objCategoriaNotc?.gtTitular ?? undefined,
+    categoryColor: item.objCategoriaNotc?.gtColorIdentf ?? undefined,
+}));
+const processWeeklySummaryData = (summaries) => summaries.map(item => ({ title: item.titulo ?? '', videoUrl: item.urlvideo1 ?? '', coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${item.portadaVideo ?? ''}`, date: item.fechapub ?? '' }));
+const processMagazineData = (magazines) => magazines.map(item => ({ year: item.anio ?? 0, month: item.mes ?? 0, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${item.urlportada ?? ''}`, pdfUrl: item.urlpw ?? '' }));
+const processFacultyData = (faculties) => faculties.map(item => ({
+    id: item.dpCodigo ?? '',
+    name: item.dpNombre ?? '',
+    mission: item.dpMision ?? null,
+    vision: item.dpVision ?? null,
+    videoUrl: item.dpUrlVideo ?? '',
+    facebookUrl: item.dpCtaFacb ?? '',
+    color: item.dpColor ?? '#4CAF50',
+    facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl ?? ''}`
+}));
+const processCareerData = (careers) => careers.map(item => ({ name: item.crNombre ?? '', description: item.crCampoOcupc ?? '', careerUrl: `${CAREER_URL_PREFIX}${item.crUrlParcial ?? ''}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${item.crUrlImgRS ?? ''}` }));
+const processTikTokData = (tiktoks) => tiktoks.map(item => ({ date: item.fechapub ?? '', title: item.titulo ?? '', videoUrl: item.urlvideo1 ?? '', coverUrl: TIKTOK_COVER_URL }));
 // --- SERVICIOS DE OBTENCIÓN DE DATOS (CON CACHÉ) ---
 const fetchData = async (endpoint, processor) => {
     const cacheKey = `api_data_${endpoint}`;
