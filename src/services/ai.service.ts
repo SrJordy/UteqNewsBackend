@@ -111,9 +111,13 @@ export const askAI = async (type: 'career' | 'faculty', name: string | undefined
     }
 
     try {
-        const prompt = `Eres un asistente de la Universidad Técnica Estatal de Quevedo (UTEQ). Responde preguntas sobre carreras y facultades basándote en la información proporcionada. 
-        IMPORTANTE: TODAS tus respuestas deben ser estrictamente en ESPAÑOL.
-        Si la pregunta no está relacionada con la UTEQ o la información proporcionada, responde que no puedes ayudar con eso.
+        const prompt = `Eres un asistente de la Universidad Técnica Estatal de Quevedo (UTEQ).
+        INSTRUCCIONES CLAVE:
+        1. Tu objetivo es responder DIRECTAMENTE a la pregunta del usuario.
+        2. El modelo puede generar pensamientos internos. TÚ DEBES IGNORARLOS en tu salida final o separarlos claramente.
+        3. PARA ASEGURAR UNA RESPUESTA LIMPIA: Encierra tu respuesta final para el usuario dentro de las etiquetas <respuesta> y </respuesta>.
+        4. Todo lo que esté fuera de estas etiquetas será ignorado.
+        5. Tu respuesta debe ser estrictamente en ESPAÑOL.
         
         Contexto Adicional: ${context}
         
@@ -142,10 +146,23 @@ export const askAI = async (type: 'career' | 'faculty', name: string | undefined
             }
         );
 
-        const text = response.data?.choices?.[0]?.message?.content;
+        let text = response.data?.choices?.[0]?.message?.content;
 
         if (text) {
-            console.log(`Éxito con OpenRouter.`);
+            console.log("Respuesta cruda recibida:", text.substring(0, 100) + "...");
+
+            // 1. Intentar extraer contenido entre <respuesta> y </respuesta>
+            const match = text.match(/<respuesta>([\s\S]*?)<\/respuesta>/i);
+            if (match && match[1]) {
+                return match[1].trim();
+            }
+
+            // 2. Fallback: Limpiar etiquetas <think> si existen (por si acaso)
+            text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+            // 3. Fallback agresivo: Si el texto empieza con "Bueno, ..." o parece pensamiento, intentar cortarlo.
+            // Pero es arriesgado. Mejor confiamos en que el modelo usará las etiquetas si se le pide.
+
             return text;
         }
     } catch (error: any) {

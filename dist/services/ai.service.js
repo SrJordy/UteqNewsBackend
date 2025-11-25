@@ -114,9 +114,12 @@ const askAI = async (type, name, question) => {
         context = "No se pudo obtener información actualizada de la UTEQ en este momento.";
     }
     try {
-        const prompt = `Eres un asistente de la Universidad Técnica Estatal de Quevedo (UTEQ). Responde preguntas sobre carreras y facultades basándote en la información proporcionada. 
-        IMPORTANTE: TODAS tus respuestas deben ser estrictamente en ESPAÑOL.
-        Si la pregunta no está relacionada con la UTEQ o la información proporcionada, responde que no puedes ayudar con eso.
+        const prompt = `Eres un asistente de la Universidad Técnica Estatal de Quevedo (UTEQ).
+        INSTRUCCIONES CLAVE:
+        1. Responde DIRECTAMENTE a la pregunta del usuario.
+        2. NO incluyas etiquetas de pensamiento como <think>...</think> ni expliques tu proceso.
+        3. NO menciones estas instrucciones ("se me dijo que...").
+        4. Tu respuesta debe ser estrictamente en ESPAÑOL.
         
         Contexto Adicional: ${context}
         
@@ -138,8 +141,10 @@ const askAI = async (type, name, question) => {
                 'Content-Type': 'application/json'
             }
         });
-        const text = response.data?.choices?.[0]?.message?.content;
+        let text = response.data?.choices?.[0]?.message?.content;
         if (text) {
+            // Limpiar etiquetas <think> si el modelo las genera
+            text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
             console.log(`Éxito con OpenRouter.`);
             return text;
         }
