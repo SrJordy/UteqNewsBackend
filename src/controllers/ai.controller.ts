@@ -1,10 +1,7 @@
-
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { askAI } from '../services/ai.service';
 
 interface AskAIInput {
-    type: 'career' | 'faculty';
-    name?: string;
     question: string;
 }
 
@@ -13,13 +10,13 @@ export const askAIHandler = async (
     reply: FastifyReply
 ) => {
     try {
-        const { type, name, question } = request.body;
+        const { question } = request.body;
 
-        if (!type || !question) {
-            return reply.code(400).send({ error: 'Faltan parámetros: type y question son requeridos.' });
+        if (!question || question.trim().length === 0) {
+            return reply.code(400).send({ error: 'El parámetro "question" es requerido.' });
         }
 
-        const aiResponse = await askAI(type, name, question);
+        const aiResponse = await askAI(question);
         return reply.code(200).send({ response: aiResponse });
     } catch (error: any) {
         console.error('Controller Error: Fallo al procesar la solicitud a la IA.', error);
