@@ -10,7 +10,30 @@ let db: any = null;
 
 // Configuración
 const DB_PATH = path.join(__dirname, '../../data/vectors.db');
+const FAQ_PATH = path.join(__dirname, '../../data/faq_carreras.json');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.GOOGLE_API_KEY;
+
+// Interfaz para FAQ
+interface FaqItem {
+    id: string;
+    carrera: string;
+    categoria: string;
+    pregunta: string;
+    respuesta: string;
+}
+
+// Cargar FAQ desde archivo JSON
+const loadFaqData = (): FaqItem[] => {
+    try {
+        if (fs.existsSync(FAQ_PATH)) {
+            const data = fs.readFileSync(FAQ_PATH, 'utf-8');
+            return JSON.parse(data);
+        }
+    } catch (error) {
+        console.error('⚠️ Error cargando FAQ:', error);
+    }
+    return [];
+};
 
 // Inicializar base de datos
 const initDatabase = async (): Promise<any> => {
@@ -108,9 +131,10 @@ export const syncVectorStore = async (): Promise<void> => {
     try {
         const database = await initDatabase();
 
-        // 1. Obtener datos de APIs
+        // 1. Obtener datos de APIs y FAQ
         const [faculties, careers] = await Promise.all([getFaculties(), getCareers()]);
-        const allData = { faculties, careers };
+        const faqData = loadFaqData();
+        const allData = { faculties, careers, faq: faqData };
 
         // 2. Calcular hash
         const currentHash = computeHash(allData);
@@ -131,6 +155,7 @@ export const syncVectorStore = async (): Promise<void> => {
         database.run('DELETE FROM vectors');
 
         // 6. Procesar facultades
+        console.log(`📚 Procesando ${faculties.length} facultades...`);
         for (const f of faculties) {
             const text = `Facultad: ${f.name}. Misión: ${f.mission || 'No disponible'}. Visión: ${f.vision || 'No disponible'}.`;
             const embedding = await generateEmbedding(text);
@@ -143,6 +168,7 @@ export const syncVectorStore = async (): Promise<void> => {
         }
 
         // 7. Procesar carreras
+        console.log(`🎓 Procesando ${careers.length} carreras...`);
         for (const c of careers) {
             const text = `Carrera: ${c.name}. Descripción: ${c.description || 'No disponible'}. URL: ${c.careerUrl}.`;
             const embedding = await generateEmbedding(text);
@@ -154,10 +180,24 @@ export const syncVectorStore = async (): Promise<void> => {
             }
         }
 
-        // 8. Guardar hash
+        // 8. Procesar FAQ de carreras
+        console.log(`❓ Procesando ${faqData.length} preguntas frecuentes...`);
+        for (const faq of faqData) {
+            // Combinar pregunta y respuesta para mejor embedding
+            const text = `[FAQ - ${faq.carrera.toUpperCase()}] Pregunta: ${faq.pregunta}. Respuesta: ${faq.respuesta}`;
+            const embedding = await generateEmbedding(text);
+            if (embedding.length > 0) {
+                database.run(
+                    'INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)',
+                    [faq.id, text, 'faq', JSON.stringify(embedding), JSON.stringify(faq)]
+                );
+            }
+        }
+
+        // 9. Guardar hash
         database.run("INSERT OR REPLACE INTO metadata (key, value) VALUES ('data_hash', ?)", [currentHash]);
 
-        // 9. Guardar BD
+        // 10. Guardar BD
         saveDatabase();
 
         const countResult = database.exec('SELECT COUNT(*) FROM vectors');
@@ -170,7 +210,7 @@ export const syncVectorStore = async (): Promise<void> => {
 };
 
 // Buscar contexto relevante
-export const searchContext = async (query: string, limit: number = 3): Promise<string> => {
+export const searchContext = async (query: string, limit: number = 5): Promise<string> => {
     try {
         const database = await initDatabase();
 
@@ -182,17 +222,21 @@ export const searchContext = async (query: string, limit: number = 3): Promise<s
         }
 
         // 2. Obtener todos los vectores
-        const result = database.exec('SELECT text, embedding FROM vectors');
+        const result = database.exec('SELECT text, type, embedding, metadata FROM vectors');
         if (result.length === 0) return '';
 
         const rows = result[0].values.map((row: any) => ({
             text: row[0] as string,
-            embedding: JSON.parse(row[1] as string) as number[]
+            type: row[1] as string,
+            embedding: JSON.parse(row[2] as string) as number[],
+            metadata: JSON.parse(row[3] as string)
         }));
 
         // 3. Calcular similitudes
         const results = rows.map((row: any) => ({
             text: row.text,
+            type: row.type,
+            metadata: row.metadata,
             score: cosineSimilarity(queryEmbedding, row.embedding)
         }));
 
@@ -200,7 +244,16 @@ export const searchContext = async (query: string, limit: number = 3): Promise<s
         results.sort((a: any, b: any) => b.score - a.score);
         const topResults = results.slice(0, limit);
 
-        return topResults.map((r: any) => r.text).join('\n\n');
+        // 5. Formatear contexto según el tipo
+        const contextParts = topResults.map((r: any) => {
+            if (r.type === 'faq') {
+                // Para FAQ, solo devolver la respuesta directa
+                return `[Pregunta Frecuente] ${r.metadata.respuesta}`;
+            }
+            return r.text;
+        });
+
+        return contextParts.join('\n\n');
 
     } catch (error) {
         console.error('❌ Error buscando contexto:', error);

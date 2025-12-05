@@ -1,0 +1,86 @@
+[
+  {
+    "id": "soft_gen_01",
+    "carrera": "software",
+    "categoria": "General",
+    "pregunta": "¿Cuántos semestres tiene la carrera? / ¿Cuánto tiempo dura la carrera? / ¿Cuál es la duración?",
+    "respuesta": "La carrera de Ingeniería de Software tiene una duración de 10 semestres (5 años aproximadamente)."
+  },
+  {
+    "id": "soft_malla_01",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en primer semestre? / Asignaturas del nivel 1",
+    "respuesta": "En el I Semestre (Primero) verás: Álgebra Lineal, Algoritmos y Lógica de Programación, Cálculo Diferencial, Introducción a la Ingeniería de Software, Estructuras Discretas I e Inglés I."
+  },
+  {
+    "id": "soft_malla_02",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en segundo semestre? / Asignaturas del nivel 2",
+    "respuesta": "En el II Semestre (Segundo) verás: Arquitectura de Computadoras, Cálculo Integral, Estructuras Discretas II, Fundamentos Físicos para Ingeniería (Física), Metodología de la Investigación, Programación Orientada a Objetos e Inglés II."
+  },
+  {
+    "id": "soft_malla_03",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en tercer semestre? / Asignaturas del nivel 3",
+    "respuesta": "En el III Semestre (Tercero) verás: Base de Datos, Estructura de Datos, Métodos Numéricos, Modelamiento de Software, Probabilidad y Estadística, Redacción Técnica e Inglés III."
+  },
+  {
+    "id": "soft_malla_04",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en cuarto semestre? / Asignaturas del nivel 4",
+    "respuesta": "En el IV Semestre (Cuarto) verás: Dinámica de Grupo y Comunicación, Fundamentos de Contabilidad y Finanzas, Ingeniería de Requerimientos, Interacción Hombre-Máquina, Investigación de Operaciones, Sistemas Operativos e Inglés IV."
+  },
+  {
+    "id": "soft_malla_05",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en quinto semestre? / Asignaturas del nivel 5",
+    "respuesta": "En el V Semestre (Quinto) verás: Administración de Base de Datos, Aplicaciones Web, Diseño y Arquitectura de Software, Modelos Matemáticos y Simulación, Verificación y Validación de Software e Inglés V."
+  },
+  {
+    "id": "soft_malla_06",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en sexto semestre? / Asignaturas del nivel 6",
+    "respuesta": "En el VI Semestre (Sexto) verás: Administración de Plataformas de Software, Aplicaciones Móviles, Construcción de Software, Proceso de Software, Redes de Datos e Inglés VI."
+  },
+  {
+    "id": "soft_malla_07",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en séptimo semestre? / Asignaturas del nivel 7",
+    "respuesta": "En el VII Semestre (Séptimo) verás: Aplicaciones Distribuidas, Calidad del Software, Inteligencia de Negocios, Mantenimiento de Software, Seguridad Informática e Inglés VII."
+  },
+  {
+    "id": "soft_malla_08",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en octavo semestre? / Asignaturas del nivel 8",
+    "respuesta": "En el VIII Semestre (Octavo) verás: Deontología Informática (Ética), Gestión de la Configuración de Software, Herramientas de Programación, Ingeniería Económica para Software, Modelos de Decisión y Optimización e Inglés VIII."
+  },
+  {
+    "id": "soft_malla_09",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en noveno semestre? / Asignaturas del nivel 9",
+    "respuesta": "En el IX Semestre (Noveno) verás: Ciencia, Tecnología y Sociedad, Formulación del Trabajo de Titulación, Gestión de Tecnologías de la Información, Realidad Nacional y Saberes Ancestrales, y Sistemas Inteligentes (IA)."
+  },
+  {
+    "id": "soft_malla_10",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Qué materias se ven en décimo semestre? / Asignaturas del nivel 10 / Ultimo semestre",
+    "respuesta": "En el X Semestre (Décimo) verás: Desarrollo del Trabajo de Titulación (Tesis), Legislación Informática, Liderazgo y Emprendimiento, Programación en la Nube y Redacción de Documentos Científicos."
+  },
+  {
+    "id": "soft_full_list",
+    "carrera": "software",
+    "categoria": "Malla Curricular",
+    "pregunta": "¿Cuáles son todas las materias de la carrera? / Malla curricular completa",
+    "respuesta": "La carrera abarca desde fundamentos como Álgebra y Algoritmos, pasando por desarrollo puro como Aplicaciones Web, Móviles y Distribuidas, hasta temas avanzados como Sistemas Inteligentes y Programación en la Nube. Puedes ver el gráfico oficial aquí: https://www.uteq.edu.ec/assets/images/careers/degrees/academic/img-uteq-malla-000030.jpg"
+  }
+]
