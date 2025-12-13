@@ -289,9 +289,8 @@ const requestPasswordReset = async (email) => {
             status: 'password_reset',
         },
     });
-    // Enviar correo con el token de reseteo
-    // Aquí deberías usar una plantilla de correo más adecuada para reseteo de contraseña
-    await (0, mailer_1.sendVerificationEmail)(user.email, `Tu código de reseteo de contraseña es: ${resetToken}. Es válido por 1 hora.`);
+    // Enviar correo con el código de reseteo usando plantilla específica
+    await (0, mailer_1.sendPasswordResetEmail)(user.email, resetToken);
     return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
 };
 exports.requestPasswordReset = requestPasswordReset;

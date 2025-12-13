@@ -2,7 +2,7 @@
 import { prisma } from '../lib/prisma';
 import * as bcrypt from 'bcryptjs';
 import { RegisterUserInput, LoginUserInput, UpdateUserInput, PreferenceInput, RequestPasswordResetInput, ResetPasswordInput } from './auth.schemas';
-import { sendVerificationEmail } from '../lib/mailer';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../lib/mailer';
 import { v4 as uuidv4 } from 'uuid'; // Para generar tokens únicos
 
 // Función para generar un código de 6 dígitos (para verificación de email)
@@ -301,9 +301,8 @@ export const requestPasswordReset = async (email: string) => {
         },
     });
 
-    // Enviar correo con el token de reseteo
-    // Aquí deberías usar una plantilla de correo más adecuada para reseteo de contraseña
-    await sendVerificationEmail(user.email, `Tu código de reseteo de contraseña es: ${resetToken}. Es válido por 1 hora.`);
+    // Enviar correo con el código de reseteo usando plantilla específica
+    await sendPasswordResetEmail(user.email, resetToken);
 
     return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
 };
