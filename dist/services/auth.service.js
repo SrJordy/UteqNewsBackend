@@ -325,8 +325,28 @@ const requestPasswordReset = (email) => __awaiter(void 0, void 0, void 0, functi
         },
     });
     // Enviar correo con el código de reseteo usando plantilla específica
-    yield (0, mailer_1.sendPasswordResetEmail)(user.email, resetToken);
-    return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
+    let emailSent = false;
+    try {
+        yield (0, mailer_1.sendPasswordResetEmail)(user.email, resetToken);
+        emailSent = true;
+        console.log(`✅ Email de reset enviado a ${user.email}`);
+    }
+    catch (emailError) {
+        console.error(`⚠️ No se pudo enviar reset email a ${user.email}. Token: ${resetToken}`);
+    }
+    if (emailSent) {
+        return {
+            message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.',
+            resetToken: null
+        };
+    }
+    else {
+        // Fallback para cuando falla el email en Render
+        return {
+            message: 'Solicitud recibida. El servicio de correo no está disponible temporalmente.',
+            resetToken: resetToken
+        };
+    }
 });
 exports.requestPasswordReset = requestPasswordReset;
 const resetPassword = (input) => __awaiter(void 0, void 0, void 0, function* () {

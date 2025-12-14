@@ -5,6 +5,7 @@ const GMAIL_USER = 'uteqnews@gmail.com';
 const GMAIL_APP_PASSWORD = 'jvwz qbay dptq pnkz';
 
 // Configuración que funciona en Render
+
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
