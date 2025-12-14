@@ -78,12 +78,26 @@ export const registerUser = async (input: RegisterUserInput) => {
         },
     });
 
-    // Enviar correo de verificación
-    await sendVerificationEmail(user.email, verificationCode);
+    // Intentar enviar correo de verificación (no bloquear registro si falla)
+    let emailSent = false;
+    try {
+        await sendVerificationEmail(user.email, verificationCode);
+        emailSent = true;
+        console.log(`✅ Email de verificación enviado a ${user.email}`);
+    } catch (emailError) {
+        console.error(`⚠️ No se pudo enviar email a ${user.email}, pero el usuario fue registrado. Código: ${verificationCode}`);
+        // El usuario puede solicitar reenvío del código más tarde
+    }
 
     // Omitir la contraseña del objeto de usuario devuelto
     const { password, ...userWithoutPassword } = user;
-    return { ...userWithoutPassword, message: 'Correo de verificación enviado. Por favor, verifica tu bandeja de entrada.' };
+
+    if (emailSent) {
+        return { ...userWithoutPassword, message: 'Correo de verificación enviado. Por favor, verifica tu bandeja de entrada.', verificationCode: null };
+    } else {
+        // Si el email falló, devolver el código directamente para que la app lo muestre
+        return { ...userWithoutPassword, message: 'Usuario registrado. El servicio de correo no está disponible temporalmente.', verificationCode: verificationCode };
+    }
 };
 
 export const verifyEmail = async (email: string, code: string) => {
