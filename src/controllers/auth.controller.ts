@@ -7,11 +7,19 @@ export const registerHandler = async (
     reply: FastifyReply
 ) => {
     try {
+        console.log('Register request received:', JSON.stringify(request.body));
         const user = await registerUser(request.body);
+        console.log('User registered successfully:', user.email);
         return reply.code(201).send(user); // 201 Created
     } catch (error: any) {
+        console.error('Registration error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+            code: error.code
+        });
         // Si el error es porque el email ya existe
-        if (error.message.includes('registrado')) {
+        if (error.message && error.message.includes('registrado')) {
             return reply.code(409).send({ error: error.message }); // 409 Conflict
         }
         console.error('Controller Error: Fallo en el registro de usuario.', error);

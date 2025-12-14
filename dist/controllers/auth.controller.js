@@ -13,12 +13,20 @@ exports.resetPasswordHandler = exports.requestPasswordResetHandler = exports.get
 const auth_service_1 = require("../services/auth.service");
 const registerHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log('Register request received:', JSON.stringify(request.body));
         const user = yield (0, auth_service_1.registerUser)(request.body);
+        console.log('User registered successfully:', user.email);
         return reply.code(201).send(user); // 201 Created
     }
     catch (error) {
+        console.error('Registration error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+            code: error.code
+        });
         // Si el error es porque el email ya existe
-        if (error.message.includes('registrado')) {
+        if (error.message && error.message.includes('registrado')) {
             return reply.code(409).send({ error: error.message }); // 409 Conflict
         }
         console.error('Controller Error: Fallo en el registro de usuario.', error);
