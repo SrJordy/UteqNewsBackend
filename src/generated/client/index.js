@@ -173,6 +173,10 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "debian-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
@@ -199,8 +203,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/client\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = \"file:../dev.db\"\n}\n\n// Modelo para los usuarios de la aplicación\nmodel Usuario {\n  id         Int      @id @default(autoincrement())\n  nombre     String\n  apellido   String\n  email      String   @unique\n  password   String // Se guardará hasheada\n  rol        String? // Ejemplo: 'estudiante', 'admin'\n  verificado Boolean  @default(false)\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  // Relaciones\n  deviceTokens DeviceToken[]\n  preferencias PreferenciaUsuarioCarrera[]\n  userCodes    UserCode[] // AÑADIDO: Relación con los códigos de verificación\n}\n\n// Modelo para almacenar las carreras que vienen de la API externa.\n// Sirve para establecer las preferencias de los usuarios.\nmodel Carrera {\n  id     Int    @id @default(autoincrement()) // ID interno de nuestra BD\n  apiId  String @unique // CAMBIADO: Ahora es String para guardar crNombre\n  nombre String\n\n  // Relaciones\n  usuariosConPreferencia PreferenciaUsuarioCarrera[]\n}\n\n// Tabla intermedia para la relación muchos-a-muchos de las preferencias\nmodel PreferenciaUsuarioCarrera {\n  usuario   Usuario  @relation(fields: [usuarioId], references: [id])\n  usuarioId Int\n  carrera   Carrera  @relation(fields: [carreraId], references: [id])\n  carreraId Int\n  createdAt DateTime @default(now())\n\n  @@id([usuarioId, carreraId])\n  @@index([carreraId])\n}\n\n// Modelo para los tokens de los dispositivos para notificaciones push\nmodel DeviceToken {\n  id        Int      @id @default(autoincrement())\n  token     String   @unique\n  usuario   Usuario  @relation(fields: [usuarioId], references: [id])\n  usuarioId Int\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  @@index([usuarioId])\n}\n\n// AÑADIDO: Modelo para los códigos de verificación de usuario\nmodel UserCode {\n  id         Int      @id @default(autoincrement())\n  userId     Int\n  code       String\n  status     String   @default(\"active\") // active, used, expired\n  expiryTime DateTime\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  user Usuario @relation(fields: [userId], references: [id])\n\n  @@index([userId])\n  @@index([code])\n}\n",
-  "inlineSchemaHash": "df6f2a62789b0e557698dc40965a47871a6fc7b2e759e7de8309ee4dab054e3e",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  binaryTargets = [\"native\", \"debian-openssl-3.0.x\"]\n  output        = \"../src/generated/client\"\n}\n\ndatasource db {\n  provider = \"sqlite\"\n  url      = \"file:../dev.db\"\n}\n\n// Modelo para los usuarios de la aplicación\nmodel Usuario {\n  id         Int      @id @default(autoincrement())\n  nombre     String\n  apellido   String\n  email      String   @unique\n  password   String // Se guardará hasheada\n  rol        String? // Ejemplo: 'estudiante', 'admin'\n  verificado Boolean  @default(false)\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  // Relaciones\n  deviceTokens DeviceToken[]\n  preferencias PreferenciaUsuarioCarrera[]\n  userCodes    UserCode[] // AÑADIDO: Relación con los códigos de verificación\n}\n\n// Modelo para almacenar las carreras que vienen de la API externa.\n// Sirve para establecer las preferencias de los usuarios.\nmodel Carrera {\n  id     Int    @id @default(autoincrement()) // ID interno de nuestra BD\n  apiId  String @unique // CAMBIADO: Ahora es String para guardar crNombre\n  nombre String\n\n  // Relaciones\n  usuariosConPreferencia PreferenciaUsuarioCarrera[]\n}\n\n// Tabla intermedia para la relación muchos-a-muchos de las preferencias\nmodel PreferenciaUsuarioCarrera {\n  usuario   Usuario  @relation(fields: [usuarioId], references: [id])\n  usuarioId Int\n  carrera   Carrera  @relation(fields: [carreraId], references: [id])\n  carreraId Int\n  createdAt DateTime @default(now())\n\n  @@id([usuarioId, carreraId])\n  @@index([carreraId])\n}\n\n// Modelo para los tokens de los dispositivos para notificaciones push\nmodel DeviceToken {\n  id        Int      @id @default(autoincrement())\n  token     String   @unique\n  usuario   Usuario  @relation(fields: [usuarioId], references: [id])\n  usuarioId Int\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  @@index([usuarioId])\n}\n\n// AÑADIDO: Modelo para los códigos de verificación de usuario\nmodel UserCode {\n  id         Int      @id @default(autoincrement())\n  userId     Int\n  code       String\n  status     String   @default(\"active\") // active, used, expired\n  expiryTime DateTime\n  createdAt  DateTime @default(now())\n  updatedAt  DateTime @updatedAt\n\n  user Usuario @relation(fields: [userId], references: [id])\n\n  @@index([userId])\n  @@index([code])\n}\n",
+  "inlineSchemaHash": "d55e9be7a2ce3c5847b76af553ebdc1a72c77c3c0a800140cf8d6989d23abbf9",
   "copyEngine": true
 }
 
@@ -241,6 +245,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "src/generated/client/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node");
+path.join(process.cwd(), "src/generated/client/libquery_engine-debian-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "src/generated/client/schema.prisma")
