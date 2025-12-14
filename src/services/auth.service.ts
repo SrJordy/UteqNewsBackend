@@ -20,7 +20,7 @@ export const registerUser = async (input: RegisterUserInput) => {
     }
 
     // Verificar si el email ya está en uso y verificado
-    const existingVerifiedUser = await prisma.usuario.findUnique({
+    const existingVerifiedUser = await prisma.usuario.findFirst({
         where: { email: input.email, verificado: true },
     });
 
@@ -29,7 +29,7 @@ export const registerUser = async (input: RegisterUserInput) => {
     }
 
     // Si existe un usuario no verificado, lo actualizamos o creamos uno nuevo
-    let user = await prisma.usuario.findUnique({
+    let user = await prisma.usuario.findFirst({
         where: { email: input.email, verificado: false },
     });
 

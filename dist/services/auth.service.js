@@ -72,14 +72,14 @@ const registerUser = (input) => __awaiter(void 0, void 0, void 0, function* () {
         assignedRol = 'Invitado';
     }
     // Verificar si el email ya está en uso y verificado
-    const existingVerifiedUser = yield prisma_1.prisma.usuario.findUnique({
+    const existingVerifiedUser = yield prisma_1.prisma.usuario.findFirst({
         where: { email: input.email, verificado: true },
     });
     if (existingVerifiedUser) {
         throw new Error('El correo electrónico ya está registrado y verificado.');
     }
     // Si existe un usuario no verificado, lo actualizamos o creamos uno nuevo
-    let user = yield prisma_1.prisma.usuario.findUnique({
+    let user = yield prisma_1.prisma.usuario.findFirst({
         where: { email: input.email, verificado: false },
     });
     const hashedPassword = yield bcrypt.hash(input.password, 10);
