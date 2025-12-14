@@ -24,7 +24,10 @@ const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
 const server = (0, fastify_1.default)({ logger: true });
 // Registrar el plugin CORS
 server.register(cors_1.default, {
-    origin: '*' // Permitir todas las solicitudes de origen (para desarrollo)
+    origin: ["*"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
 });
 // Ruta principal para verificar el estado del servidor
 server.get('/', (request, reply) => __awaiter(void 0, void 0, void 0, function* () {

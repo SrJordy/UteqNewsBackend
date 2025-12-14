@@ -12,7 +12,10 @@ const server = Fastify({ logger: true });
 
 // Registrar el plugin CORS
 server.register(cors, {
-  origin: '*' // Permitir todas las solicitudes de origen (para desarrollo)
+  origin: ["*"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 });
 
 // Ruta principal para verificar el estado del servidor
