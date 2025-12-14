@@ -16,13 +16,20 @@ exports.sendPasswordResetEmail = exports.sendVerificationEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const GMAIL_USER = 'uteqnews@gmail.com';
 const GMAIL_APP_PASSWORD = 'jvwz qbay dptq pnkz';
+// Configuración que funciona en Render
 const transporter = nodemailer_1.default.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true para 465, false para 587
     auth: {
         user: GMAIL_USER,
         pass: GMAIL_APP_PASSWORD,
     },
+    tls: {
+        rejectUnauthorized: false
+    }
 });
+console.log('📧 SMTP Transporter inicializado - Host: smtp.gmail.com, Puerto: 587');
 /**
  * Envía un correo electrónico de verificación con un código.
  */
