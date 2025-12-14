@@ -32,6 +32,26 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resetPassword = exports.requestPasswordReset = exports.getPreferences = exports.removePreference = exports.addPreference = exports.updateUser = exports.loginUser = exports.verifyEmail = exports.registerUser = void 0;
 const prisma_1 = require("../lib/prisma");
@@ -42,7 +62,7 @@ const uuid_1 = require("uuid"); // Para generar tokens únicos
 const generateVerificationCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
-const registerUser = async (input) => {
+const registerUser = (input) => __awaiter(void 0, void 0, void 0, function* () {
     // Determinar el rol basado en el email
     let assignedRol;
     if (input.email.endsWith('@uteq.edu.ec')) {
@@ -52,20 +72,20 @@ const registerUser = async (input) => {
         assignedRol = 'Invitado';
     }
     // Verificar si el email ya está en uso y verificado
-    const existingVerifiedUser = await prisma_1.prisma.usuario.findUnique({
+    const existingVerifiedUser = yield prisma_1.prisma.usuario.findUnique({
         where: { email: input.email, verificado: true },
     });
     if (existingVerifiedUser) {
         throw new Error('El correo electrónico ya está registrado y verificado.');
     }
     // Si existe un usuario no verificado, lo actualizamos o creamos uno nuevo
-    let user = await prisma_1.prisma.usuario.findUnique({
+    let user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: input.email, verificado: false },
     });
-    const hashedPassword = await bcrypt.hash(input.password, 10);
+    const hashedPassword = yield bcrypt.hash(input.password, 10);
     if (user) {
         // Actualizar usuario existente no verificado
-        user = await prisma_1.prisma.usuario.update({
+        user = yield prisma_1.prisma.usuario.update({
             where: { id: user.id },
             data: {
                 nombre: input.nombre,
@@ -77,7 +97,7 @@ const registerUser = async (input) => {
     }
     else {
         // Crear nuevo usuario no verificado
-        user = await prisma_1.prisma.usuario.create({
+        user = yield prisma_1.prisma.usuario.create({
             data: {
                 nombre: input.nombre,
                 apellido: input.apellido,
@@ -92,10 +112,10 @@ const registerUser = async (input) => {
     const verificationCode = generateVerificationCode();
     const expiryTime = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos a partir de ahora
     // Eliminar códigos anteriores activos para este usuario
-    await prisma_1.prisma.userCode.deleteMany({
+    yield prisma_1.prisma.userCode.deleteMany({
         where: { userId: user.id, status: 'active' },
     });
-    await prisma_1.prisma.userCode.create({
+    yield prisma_1.prisma.userCode.create({
         data: {
             userId: user.id,
             code: verificationCode,
@@ -104,20 +124,20 @@ const registerUser = async (input) => {
         },
     });
     // Enviar correo de verificación
-    await (0, mailer_1.sendVerificationEmail)(user.email, verificationCode);
+    yield (0, mailer_1.sendVerificationEmail)(user.email, verificationCode);
     // Omitir la contraseña del objeto de usuario devuelto
-    const { password, ...userWithoutPassword } = user;
-    return { ...userWithoutPassword, message: 'Correo de verificación enviado. Por favor, verifica tu bandeja de entrada.' };
-};
+    const { password } = user, userWithoutPassword = __rest(user, ["password"]);
+    return Object.assign(Object.assign({}, userWithoutPassword), { message: 'Correo de verificación enviado. Por favor, verifica tu bandeja de entrada.' });
+});
 exports.registerUser = registerUser;
-const verifyEmail = async (email, code) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const verifyEmail = (email, code) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: email },
     });
     if (!user) {
         throw new Error('Usuario no encontrado.');
     }
-    const userCode = await prisma_1.prisma.userCode.findFirst({
+    const userCode = yield prisma_1.prisma.userCode.findFirst({
         where: {
             userId: user.id,
             code: code,
@@ -130,21 +150,21 @@ const verifyEmail = async (email, code) => {
         throw new Error('Código de verificación inválido o expirado.');
     }
     // Marcar el código como usado
-    await prisma_1.prisma.userCode.update({
+    yield prisma_1.prisma.userCode.update({
         where: { id: userCode.id },
         data: { status: 'used' },
     });
     // Marcar al usuario como verificado
-    const updatedUser = await prisma_1.prisma.usuario.update({
+    const updatedUser = yield prisma_1.prisma.usuario.update({
         where: { id: user.id },
         data: { verificado: true },
     });
-    const { password, ...userWithoutPassword } = updatedUser;
-    return { ...userWithoutPassword, message: 'Correo verificado exitosamente.' };
-};
+    const { password } = updatedUser, userWithoutPassword = __rest(updatedUser, ["password"]);
+    return Object.assign(Object.assign({}, userWithoutPassword), { message: 'Correo verificado exitosamente.' });
+});
 exports.verifyEmail = verifyEmail;
-const loginUser = async (input) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const loginUser = (input) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: input.email },
     });
     if (!user) {
@@ -155,43 +175,43 @@ const loginUser = async (input) => {
         throw new Error('Por favor, verifica tu correo electrónico antes de iniciar sesión.');
     }
     // Comparar la contraseña hasheada
-    const passwordMatch = await bcrypt.compare(input.password, user.password);
+    const passwordMatch = yield bcrypt.compare(input.password, user.password);
     if (!passwordMatch) {
         throw new Error('Credenciales inválidas.');
     }
     // Omitir la contraseña del objeto de usuario devuelto
-    const { password, ...userWithoutPassword } = user;
+    const { password } = user, userWithoutPassword = __rest(user, ["password"]);
     return userWithoutPassword;
-};
+});
 exports.loginUser = loginUser;
-const updateUser = async (email, updateData) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const updateUser = (email, updateData) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: email },
     });
     if (!user) {
         throw new Error('Usuario no encontrado.');
     }
-    const dataToUpdate = { ...updateData };
+    const dataToUpdate = Object.assign({}, updateData);
     if (updateData.password) {
-        dataToUpdate.password = await bcrypt.hash(updateData.password, 10);
+        dataToUpdate.password = yield bcrypt.hash(updateData.password, 10);
     }
-    const updatedUser = await prisma_1.prisma.usuario.update({
+    const updatedUser = yield prisma_1.prisma.usuario.update({
         where: { id: user.id },
         data: dataToUpdate,
     });
-    const { password, ...userWithoutPassword } = updatedUser;
+    const { password } = updatedUser, userWithoutPassword = __rest(updatedUser, ["password"]);
     return userWithoutPassword;
-};
+});
 exports.updateUser = updateUser;
-const addPreference = async (email, careerName) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const addPreference = (email, careerName) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: email },
     });
     if (!user) {
         throw new Error('Usuario no encontrado.');
     }
     // Buscar o crear la carrera por su nombre (que ahora es el apiId String)
-    const career = await prisma_1.prisma.carrera.upsert({
+    const career = yield prisma_1.prisma.carrera.upsert({
         where: { apiId: careerName }, // Usamos careerName como apiId
         update: {},
         create: {
@@ -200,7 +220,7 @@ const addPreference = async (email, careerName) => {
         },
     });
     // Verificar si la preferencia ya existe
-    const existingPreference = await prisma_1.prisma.preferenciaUsuarioCarrera.findUnique({
+    const existingPreference = yield prisma_1.prisma.preferenciaUsuarioCarrera.findUnique({
         where: {
             usuarioId_carreraId: {
                 usuarioId: user.id,
@@ -212,30 +232,30 @@ const addPreference = async (email, careerName) => {
         throw new Error('Esta preferencia ya ha sido añadida.');
     }
     // Añadir la preferencia
-    await prisma_1.prisma.preferenciaUsuarioCarrera.create({
+    yield prisma_1.prisma.preferenciaUsuarioCarrera.create({
         data: {
             usuarioId: user.id,
             carreraId: career.id,
         },
     });
     return { message: `Preferencia por ${careerName} añadida exitosamente.` };
-};
+});
 exports.addPreference = addPreference;
-const removePreference = async (email, careerName) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const removePreference = (email, careerName) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: email },
     });
     if (!user) {
         throw new Error('Usuario no encontrado.');
     }
-    const career = await prisma_1.prisma.carrera.findUnique({
+    const career = yield prisma_1.prisma.carrera.findUnique({
         where: { apiId: careerName },
     });
     if (!career) {
         throw new Error('Carrera no encontrada.');
     }
     // Eliminar la preferencia
-    const deleted = await prisma_1.prisma.preferenciaUsuarioCarrera.delete({
+    const deleted = yield prisma_1.prisma.preferenciaUsuarioCarrera.delete({
         where: {
             usuarioId_carreraId: {
                 usuarioId: user.id,
@@ -247,10 +267,10 @@ const removePreference = async (email, careerName) => {
         throw new Error('Preferencia no encontrada para eliminar.');
     }
     return { message: `Preferencia por ${careerName} eliminada exitosamente.` };
-};
+});
 exports.removePreference = removePreference;
-const getPreferences = async (email) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const getPreferences = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: email },
         include: {
             preferencias: {
@@ -266,10 +286,10 @@ const getPreferences = async (email) => {
     // Mapear las preferencias para devolver solo los nombres de las carreras
     const preferredCareers = user.preferencias.map(p => p.carrera.nombre);
     return { email: user.email, preferences: preferredCareers };
-};
+});
 exports.getPreferences = getPreferences;
-const requestPasswordReset = async (email) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const requestPasswordReset = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: email },
     });
     if (!user) {
@@ -278,10 +298,10 @@ const requestPasswordReset = async (email) => {
     const resetToken = (0, uuid_1.v4)(); // Generar un token único
     const expiryTime = new Date(Date.now() + 60 * 60 * 1000); // 1 hora de validez
     // Eliminar tokens de reseteo de contraseña anteriores activos para este usuario
-    await prisma_1.prisma.userCode.deleteMany({
+    yield prisma_1.prisma.userCode.deleteMany({
         where: { userId: user.id, status: 'password_reset' },
     });
-    await prisma_1.prisma.userCode.create({
+    yield prisma_1.prisma.userCode.create({
         data: {
             userId: user.id,
             code: resetToken,
@@ -290,18 +310,18 @@ const requestPasswordReset = async (email) => {
         },
     });
     // Enviar correo con el código de reseteo usando plantilla específica
-    await (0, mailer_1.sendPasswordResetEmail)(user.email, resetToken);
+    yield (0, mailer_1.sendPasswordResetEmail)(user.email, resetToken);
     return { message: 'Si el correo electrónico está registrado, recibirás un enlace para restablecer tu contraseña.' };
-};
+});
 exports.requestPasswordReset = requestPasswordReset;
-const resetPassword = async (input) => {
-    const user = await prisma_1.prisma.usuario.findUnique({
+const resetPassword = (input) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield prisma_1.prisma.usuario.findUnique({
         where: { email: input.email },
     });
     if (!user) {
         throw new Error('Usuario no encontrado.');
     }
-    const userCode = await prisma_1.prisma.userCode.findFirst({
+    const userCode = yield prisma_1.prisma.userCode.findFirst({
         where: {
             userId: user.id,
             code: input.token,
@@ -314,18 +334,18 @@ const resetPassword = async (input) => {
         throw new Error('Token de reseteo de contraseña inválido o expirado.');
     }
     // Hashear la nueva contraseña
-    const hashedPassword = await bcrypt.hash(input.newPassword, 10);
+    const hashedPassword = yield bcrypt.hash(input.newPassword, 10);
     // Actualizar la contraseña del usuario
-    const updatedUser = await prisma_1.prisma.usuario.update({
+    const updatedUser = yield prisma_1.prisma.usuario.update({
         where: { id: user.id },
         data: { password: hashedPassword },
     });
     // Marcar el token como usado
-    await prisma_1.prisma.userCode.update({
+    yield prisma_1.prisma.userCode.update({
         where: { id: userCode.id },
         data: { status: 'used' },
     });
-    const { password, ...userWithoutPassword } = updatedUser;
-    return { ...userWithoutPassword, message: 'Contraseña restablecida exitosamente.' };
-};
+    const { password } = updatedUser, userWithoutPassword = __rest(updatedUser, ["password"]);
+    return Object.assign(Object.assign({}, userWithoutPassword), { message: 'Contraseña restablecida exitosamente.' });
+});
 exports.resetPassword = resetPassword;

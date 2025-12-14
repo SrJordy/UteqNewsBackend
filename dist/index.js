@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -18,9 +27,9 @@ server.register(cors_1.default, {
     origin: '*' // Permitir todas las solicitudes de origen (para desarrollo)
 });
 // Ruta principal para verificar el estado del servidor
-server.get('/', async (request, reply) => {
+server.get('/', (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     return { status: 'ok', message: 'Servidor UTEQNewsBackend funcionando' };
-});
+}));
 // Registrar las rutas de la API
 server.register(auth_routes_1.default, { prefix: '/api/auth' });
 server.register(news_routes_1.default, { prefix: '/api/news' });
@@ -29,14 +38,14 @@ server.register(magazine_routes_1.default, { prefix: '/api/magazines' });
 server.register(faculty_routes_1.default, { prefix: '/api/faculties' });
 server.register(career_routes_1.default, { prefix: '/api/careers' });
 server.register(ai_routes_1.default, { prefix: '/api/ai' });
-const start = async () => {
+const start = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        await server.listen({ port: 3000, host: '0.0.0.0' });
+        yield server.listen({ port: 3000, host: '0.0.0.0' });
         server.log.info('🚀 Servidor corriendo en http://0.0.0.0:3000');
     }
     catch (err) {
         server.log.error(err);
         process.exit(1);
     }
-};
+});
 start();

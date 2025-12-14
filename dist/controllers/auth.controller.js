@@ -1,10 +1,19 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resetPasswordHandler = exports.requestPasswordResetHandler = exports.getPreferencesHandler = exports.removePreferenceHandler = exports.addPreferenceHandler = exports.updateHandler = exports.loginHandler = exports.verifyEmailHandler = exports.registerHandler = void 0;
 const auth_service_1 = require("../services/auth.service");
-const registerHandler = async (request, reply) => {
+const registerHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = await (0, auth_service_1.registerUser)(request.body);
+        const user = yield (0, auth_service_1.registerUser)(request.body);
         return reply.code(201).send(user); // 201 Created
     }
     catch (error) {
@@ -15,12 +24,12 @@ const registerHandler = async (request, reply) => {
         console.error('Controller Error: Fallo en el registro de usuario.', error);
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al registrar el usuario.' });
     }
-};
+});
 exports.registerHandler = registerHandler;
-const verifyEmailHandler = async (request, reply) => {
+const verifyEmailHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, code } = request.body;
-        const result = await (0, auth_service_1.verifyEmail)(email, code);
+        const result = yield (0, auth_service_1.verifyEmail)(email, code);
         return reply.code(200).send(result);
     }
     catch (error) {
@@ -31,11 +40,11 @@ const verifyEmailHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al verificar el correo.' });
     }
-};
+});
 exports.verifyEmailHandler = verifyEmailHandler;
-const loginHandler = async (request, reply) => {
+const loginHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = await (0, auth_service_1.loginUser)(request.body);
+        const user = yield (0, auth_service_1.loginUser)(request.body);
         return reply.code(200).send(user);
     }
     catch (error) {
@@ -46,12 +55,12 @@ const loginHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al iniciar sesión.' });
     }
-};
+});
 exports.loginHandler = loginHandler;
-const updateHandler = async (request, reply) => {
+const updateHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email } = request.params;
-        const updatedUser = await (0, auth_service_1.updateUser)(email, request.body);
+        const updatedUser = yield (0, auth_service_1.updateUser)(email, request.body);
         return reply.code(200).send(updatedUser);
     }
     catch (error) {
@@ -61,12 +70,12 @@ const updateHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al actualizar el usuario.' });
     }
-};
+});
 exports.updateHandler = updateHandler;
-const addPreferenceHandler = async (request, reply) => {
+const addPreferenceHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, careerName } = request.body;
-        const result = await (0, auth_service_1.addPreference)(email, careerName);
+        const result = yield (0, auth_service_1.addPreference)(email, careerName);
         return reply.code(200).send(result);
     }
     catch (error) {
@@ -76,12 +85,12 @@ const addPreferenceHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al añadir la preferencia.' });
     }
-};
+});
 exports.addPreferenceHandler = addPreferenceHandler;
-const removePreferenceHandler = async (request, reply) => {
+const removePreferenceHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, careerName } = request.body;
-        const result = await (0, auth_service_1.removePreference)(email, careerName);
+        const result = yield (0, auth_service_1.removePreference)(email, careerName);
         return reply.code(200).send(result);
     }
     catch (error) {
@@ -91,12 +100,12 @@ const removePreferenceHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al eliminar la preferencia.' });
     }
-};
+});
 exports.removePreferenceHandler = removePreferenceHandler;
-const getPreferencesHandler = async (request, reply) => {
+const getPreferencesHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email } = request.params;
-        const preferences = await (0, auth_service_1.getPreferences)(email);
+        const preferences = yield (0, auth_service_1.getPreferences)(email);
         return reply.code(200).send(preferences);
     }
     catch (error) {
@@ -106,12 +115,12 @@ const getPreferencesHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al obtener las preferencias.' });
     }
-};
+});
 exports.getPreferencesHandler = getPreferencesHandler;
-const requestPasswordResetHandler = async (request, reply) => {
+const requestPasswordResetHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email } = request.body;
-        const result = await (0, auth_service_1.requestPasswordReset)(email);
+        const result = yield (0, auth_service_1.requestPasswordReset)(email);
         return reply.code(200).send(result);
     }
     catch (error) {
@@ -121,11 +130,11 @@ const requestPasswordResetHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al solicitar reseteo de contraseña.' });
     }
-};
+});
 exports.requestPasswordResetHandler = requestPasswordResetHandler;
-const resetPasswordHandler = async (request, reply) => {
+const resetPasswordHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = await (0, auth_service_1.resetPassword)(request.body);
+        const result = yield (0, auth_service_1.resetPassword)(request.body);
         return reply.code(200).send(result);
     }
     catch (error) {
@@ -135,5 +144,5 @@ const resetPasswordHandler = async (request, reply) => {
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al resetear contraseña.' });
     }
-};
+});
 exports.resetPasswordHandler = resetPasswordHandler;

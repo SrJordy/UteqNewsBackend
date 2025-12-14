@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -17,7 +26,7 @@ const transporter = nodemailer_1.default.createTransport({
 /**
  * Envía un correo electrónico de verificación con un código.
  */
-const sendVerificationEmail = async (to, code) => {
+const sendVerificationEmail = (to, code) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const mailOptions = {
             from: `"UTEQ News" <${GMAIL_USER}>`,
@@ -80,19 +89,19 @@ const sendVerificationEmail = async (to, code) => {
                 </html>
             `,
         };
-        await transporter.sendMail(mailOptions);
+        yield transporter.sendMail(mailOptions);
         console.log(`✉️ Correo de verificación enviado a ${to}`);
     }
     catch (error) {
         console.error(`❌ Error al enviar correo de verificación a ${to}:`, error);
         throw new Error('No se pudo enviar el correo de verificación.');
     }
-};
+});
 exports.sendVerificationEmail = sendVerificationEmail;
 /**
  * Envía un correo electrónico para resetear contraseña.
  */
-const sendPasswordResetEmail = async (to, code) => {
+const sendPasswordResetEmail = (to, code) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const mailOptions = {
             from: `"UTEQ News" <${GMAIL_USER}>`,
@@ -156,12 +165,12 @@ const sendPasswordResetEmail = async (to, code) => {
                 </html>
             `,
         };
-        await transporter.sendMail(mailOptions);
+        yield transporter.sendMail(mailOptions);
         console.log(`✉️ Correo de recuperación enviado a ${to}`);
     }
     catch (error) {
         console.error(`❌ Error al enviar correo de recuperación a ${to}:`, error);
         throw new Error('No se pudo enviar el correo de recuperación.');
     }
-};
+});
 exports.sendPasswordResetEmail = sendPasswordResetEmail;

@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -30,13 +39,13 @@ const loadFaqData = () => {
     return [];
 };
 // Inicializar base de datos
-const initDatabase = async () => {
+const initDatabase = () => __awaiter(void 0, void 0, void 0, function* () {
     if (db)
         return db;
     // Importación dinámica de sql.js
     if (!SQL) {
         const initSqlJs = require('sql.js');
-        SQL = await initSqlJs();
+        SQL = yield initSqlJs();
     }
     // Crear directorio si no existe
     const dataDir = path_1.default.dirname(DB_PATH);
@@ -68,7 +77,7 @@ const initDatabase = async () => {
         )
     `);
     return db;
-};
+});
 // Guardar base de datos a disco
 const saveDatabase = () => {
     if (!db)
@@ -82,9 +91,10 @@ const computeHash = (data) => {
     return crypto_1.default.createHash('sha256').update(JSON.stringify(data)).digest('hex');
 };
 // Generar embedding usando OpenRouter
-const generateEmbedding = async (text) => {
+const generateEmbedding = (text) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d;
     try {
-        const response = await axios_1.default.post('https://openrouter.ai/api/v1/embeddings', {
+        const response = yield axios_1.default.post('https://openrouter.ai/api/v1/embeddings', {
             model: 'openai/text-embedding-3-small',
             input: text
         }, {
@@ -93,13 +103,13 @@ const generateEmbedding = async (text) => {
                 'Content-Type': 'application/json'
             }
         });
-        return response.data?.data?.[0]?.embedding || [];
+        return ((_c = (_b = (_a = response.data) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.embedding) || [];
     }
     catch (error) {
-        console.error('❌ Error generando embedding:', error.response?.data || error.message);
+        console.error('❌ Error generando embedding:', ((_d = error.response) === null || _d === void 0 ? void 0 : _d.data) || error.message);
         return [];
     }
-};
+});
 // Calcular similitud coseno
 const cosineSimilarity = (a, b) => {
     if (a.length !== b.length || a.length === 0)
@@ -110,12 +120,12 @@ const cosineSimilarity = (a, b) => {
     return dotProduct / (magnitudeA * magnitudeB);
 };
 // Sincronizar vector store
-const syncVectorStore = async () => {
+const syncVectorStore = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log('🔄 Sincronizando base de datos vectorial...');
     try {
-        const database = await initDatabase();
+        const database = yield initDatabase();
         // 1. Obtener datos de APIs y FAQ
-        const [faculties, careers] = await Promise.all([(0, uteqApi_service_1.getFaculties)(), (0, uteqApi_service_1.getCareers)()]);
+        const [faculties, careers] = yield Promise.all([(0, uteqApi_service_1.getFaculties)(), (0, uteqApi_service_1.getCareers)()]);
         const faqData = loadFaqData();
         const allData = { faculties, careers, faq: faqData };
         // 2. Calcular hash
@@ -135,7 +145,7 @@ const syncVectorStore = async () => {
         console.log(`📚 Procesando ${faculties.length} facultades...`);
         for (const f of faculties) {
             const text = `Facultad: ${f.name}. Misión: ${f.mission || 'No disponible'}. Visión: ${f.vision || 'No disponible'}.`;
-            const embedding = await generateEmbedding(text);
+            const embedding = yield generateEmbedding(text);
             if (embedding.length > 0) {
                 database.run('INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)', [`faculty-${f.id}`, text, 'faculty', JSON.stringify(embedding), JSON.stringify(f)]);
             }
@@ -144,7 +154,7 @@ const syncVectorStore = async () => {
         console.log(`🎓 Procesando ${careers.length} carreras...`);
         for (const c of careers) {
             const text = `Carrera: ${c.name}. Descripción: ${c.description || 'No disponible'}. URL: ${c.careerUrl}.`;
-            const embedding = await generateEmbedding(text);
+            const embedding = yield generateEmbedding(text);
             if (embedding.length > 0) {
                 database.run('INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)', [`career-${c.name}`, text, 'career', JSON.stringify(embedding), JSON.stringify(c)]);
             }
@@ -154,7 +164,7 @@ const syncVectorStore = async () => {
         for (const faq of faqData) {
             // Combinar pregunta y respuesta para mejor embedding
             const text = `[FAQ - ${faq.carrera.toUpperCase()}] Pregunta: ${faq.pregunta}. Respuesta: ${faq.respuesta}`;
-            const embedding = await generateEmbedding(text);
+            const embedding = yield generateEmbedding(text);
             if (embedding.length > 0) {
                 database.run('INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)', [faq.id, text, 'faq', JSON.stringify(embedding), JSON.stringify(faq)]);
             }
@@ -170,14 +180,14 @@ const syncVectorStore = async () => {
     catch (error) {
         console.error('❌ Error sincronizando vector store:', error);
     }
-};
+});
 exports.syncVectorStore = syncVectorStore;
 // Buscar contexto relevante
-const searchContext = async (query, limit = 5) => {
+const searchContext = (query_1, ...args_1) => __awaiter(void 0, [query_1, ...args_1], void 0, function* (query, limit = 5) {
     try {
-        const database = await initDatabase();
+        const database = yield initDatabase();
         // 1. Generar embedding de la consulta
-        const queryEmbedding = await generateEmbedding(query);
+        const queryEmbedding = yield generateEmbedding(query);
         if (queryEmbedding.length === 0) {
             console.warn('⚠️ No se pudo generar embedding para la consulta.');
             return '';
@@ -216,7 +226,7 @@ const searchContext = async (query, limit = 5) => {
         console.error('❌ Error buscando contexto:', error);
         return '';
     }
-};
+});
 exports.searchContext = searchContext;
 // Inicializar al importar
 console.log('🚀 Vector service cargado. Sincronizando en segundo plano...');

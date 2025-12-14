@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -26,12 +35,13 @@ let accessToken = null;
 // --- CACHÉ --- (TTL de 10 minutos por defecto)
 const cache = new node_cache_1.default({ stdTTL: 600 });
 // --- AUTENTICACIÓN ---
-const authenticate = async () => {
+const authenticate = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     if (accessToken)
         return accessToken;
     try {
-        const response = await axios_1.default.post(`${UTEQ_API_BASE_URL}/api/auth/signin`, AUTH_CREDENTIALS, { httpsAgent: insecureAgent });
-        const token = response.data?.accessToken;
+        const response = yield axios_1.default.post(`${UTEQ_API_BASE_URL}/api/auth/signin`, AUTH_CREDENTIALS, { httpsAgent: insecureAgent });
+        const token = (_a = response.data) === null || _a === void 0 ? void 0 : _a.accessToken;
         if (token && typeof token === 'string') {
             accessToken = token;
             console.log('Token de UTEQ API obtenido correctamente.');
@@ -43,44 +53,50 @@ const authenticate = async () => {
         console.error('Error al autenticar con la API de UTEQ', error);
         throw new Error('Fallo en la autenticación con el servicio externo.');
     }
-};
+});
 exports.authenticate = authenticate;
 // --- CLIENTE AXIOS ---
 exports.uteqApiClient = axios_1.default.create({
     baseURL: `${UTEQ_API_BASE_URL}/functions/information/entity`,
     httpsAgent: insecureAgent
 });
-exports.uteqApiClient.interceptors.request.use(async (config) => {
-    config.headers.Authorization = `Bearer ${await (0, exports.authenticate)()}`;
+exports.uteqApiClient.interceptors.request.use((config) => __awaiter(void 0, void 0, void 0, function* () {
+    config.headers.Authorization = `Bearer ${yield (0, exports.authenticate)()}`;
     return config;
-}, (error) => Promise.reject(error));
+}), (error) => Promise.reject(error));
 // --- PROCESADORES DE DATOS ---
-const processNewsData = (news) => news.map(item => ({
-    id: item.ntTitular ?? '',
-    title: item.ntTitular ?? '',
-    date: item.ntFecha ?? '',
-    newsUrl: `${NEWS_URL_PREFIX}${item.ntUrlNoticia ?? ''}`,
-    coverUrl: `${NEWS_COVER_URL_PREFIX}${item.ntUrlPortada ?? ''}`,
-    departmentName: item.objDepartamento?.dpNombre ?? undefined,
-    categoryName: item.objCategoriaNotc?.gtTitular ?? undefined,
-    categoryColor: item.objCategoriaNotc?.gtColorIdentf ?? undefined,
-}));
-const processWeeklySummaryData = (summaries) => summaries.map(item => ({ title: item.titulo ?? '', videoUrl: item.urlvideo1 ?? '', coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${item.portadaVideo ?? ''}`, date: item.fechapub ?? '' }));
-const processMagazineData = (magazines) => magazines.map(item => ({ year: item.anio ?? 0, month: item.mes ?? 0, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${item.urlportada ?? ''}`, pdfUrl: item.urlpw ?? '' }));
-const processFacultyData = (faculties) => faculties.map(item => ({
-    id: item.dpCodigo ?? '',
-    name: item.dpNombre ?? '',
-    mission: item.dpMision ?? null,
-    vision: item.dpVision ?? null,
-    videoUrl: item.dpUrlVideo ?? '',
-    facebookUrl: item.dpCtaFacb ?? '',
-    color: item.dpColor ?? '#4CAF50',
-    facultyUrl: `${FACULTY_URL_PREFIX}${item.dpParcialUrl ?? ''}`
-}));
-const processCareerData = (careers) => careers.map(item => ({ name: item.crNombre ?? '', description: item.crCampoOcupc ?? '', careerUrl: `${CAREER_URL_PREFIX}${item.crUrlParcial ?? ''}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${item.crUrlImgRS ?? ''}` }));
-const processTikTokData = (tiktoks) => tiktoks.map(item => ({ date: item.fechapub ?? '', title: item.titulo ?? '', videoUrl: item.urlvideo1 ?? '', coverUrl: TIKTOK_COVER_URL }));
+const processNewsData = (news) => news.map(item => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    return ({
+        id: (_a = item.ntTitular) !== null && _a !== void 0 ? _a : '',
+        title: (_b = item.ntTitular) !== null && _b !== void 0 ? _b : '',
+        date: (_c = item.ntFecha) !== null && _c !== void 0 ? _c : '',
+        newsUrl: `${NEWS_URL_PREFIX}${(_d = item.ntUrlNoticia) !== null && _d !== void 0 ? _d : ''}`,
+        coverUrl: `${NEWS_COVER_URL_PREFIX}${(_e = item.ntUrlPortada) !== null && _e !== void 0 ? _e : ''}`,
+        departmentName: (_g = (_f = item.objDepartamento) === null || _f === void 0 ? void 0 : _f.dpNombre) !== null && _g !== void 0 ? _g : undefined,
+        categoryName: (_j = (_h = item.objCategoriaNotc) === null || _h === void 0 ? void 0 : _h.gtTitular) !== null && _j !== void 0 ? _j : undefined,
+        categoryColor: (_l = (_k = item.objCategoriaNotc) === null || _k === void 0 ? void 0 : _k.gtColorIdentf) !== null && _l !== void 0 ? _l : undefined,
+    });
+});
+const processWeeklySummaryData = (summaries) => summaries.map(item => { var _a, _b, _c, _d; return ({ title: (_a = item.titulo) !== null && _a !== void 0 ? _a : '', videoUrl: (_b = item.urlvideo1) !== null && _b !== void 0 ? _b : '', coverUrl: `${WEEKLY_SUMMARY_COVER_URL_PREFIX}${(_c = item.portadaVideo) !== null && _c !== void 0 ? _c : ''}`, date: (_d = item.fechapub) !== null && _d !== void 0 ? _d : '' }); });
+const processMagazineData = (magazines) => magazines.map(item => { var _a, _b, _c, _d; return ({ year: (_a = item.anio) !== null && _a !== void 0 ? _a : 0, month: (_b = item.mes) !== null && _b !== void 0 ? _b : 0, coverUrl: `${MAGAZINE_COVER_URL_PREFIX}${(_c = item.urlportada) !== null && _c !== void 0 ? _c : ''}`, pdfUrl: (_d = item.urlpw) !== null && _d !== void 0 ? _d : '' }); });
+const processFacultyData = (faculties) => faculties.map(item => {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    return ({
+        id: (_a = item.dpCodigo) !== null && _a !== void 0 ? _a : '',
+        name: (_b = item.dpNombre) !== null && _b !== void 0 ? _b : '',
+        mission: (_c = item.dpMision) !== null && _c !== void 0 ? _c : null,
+        vision: (_d = item.dpVision) !== null && _d !== void 0 ? _d : null,
+        videoUrl: (_e = item.dpUrlVideo) !== null && _e !== void 0 ? _e : '',
+        facebookUrl: (_f = item.dpCtaFacb) !== null && _f !== void 0 ? _f : '',
+        color: (_g = item.dpColor) !== null && _g !== void 0 ? _g : '#4CAF50',
+        facultyUrl: `${FACULTY_URL_PREFIX}${(_h = item.dpParcialUrl) !== null && _h !== void 0 ? _h : ''}`
+    });
+});
+const processCareerData = (careers) => careers.map(item => { var _a, _b, _c, _d; return ({ name: (_a = item.crNombre) !== null && _a !== void 0 ? _a : '', description: (_b = item.crCampoOcupc) !== null && _b !== void 0 ? _b : '', careerUrl: `${CAREER_URL_PREFIX}${(_c = item.crUrlParcial) !== null && _c !== void 0 ? _c : ''}`, imageUrl: `${CAREER_IMAGE_URL_PREFIX}${(_d = item.crUrlImgRS) !== null && _d !== void 0 ? _d : ''}` }); });
+const processTikTokData = (tiktoks) => tiktoks.map(item => { var _a, _b, _c; return ({ date: (_a = item.fechapub) !== null && _a !== void 0 ? _a : '', title: (_b = item.titulo) !== null && _b !== void 0 ? _b : '', videoUrl: (_c = item.urlvideo1) !== null && _c !== void 0 ? _c : '', coverUrl: TIKTOK_COVER_URL }); });
 // --- SERVICIOS DE OBTENCIÓN DE DATOS (CON CACHÉ) ---
-const fetchData = async (endpoint, processor) => {
+const fetchData = (endpoint, processor) => __awaiter(void 0, void 0, void 0, function* () {
     const cacheKey = `api_data_${endpoint}`;
     const cachedData = cache.get(cacheKey);
     if (cachedData) {
@@ -88,7 +104,7 @@ const fetchData = async (endpoint, processor) => {
         return cachedData;
     }
     try {
-        const response = await exports.uteqApiClient.get(endpoint);
+        const response = yield exports.uteqApiClient.get(endpoint);
         const processedData = processor(response.data);
         cache.set(cacheKey, processedData);
         console.log(`Cache set for ${cacheKey}`);
@@ -98,7 +114,7 @@ const fetchData = async (endpoint, processor) => {
         console.error(`Error al obtener datos del endpoint ${endpoint}:`, error);
         throw new Error(`No se pudieron obtener los datos del endpoint ${endpoint}.`);
     }
-};
+});
 // Exportar todas las funciones de servicio que usan fetchData (DECLARADAS ANTES DE USARSE)
 const getLatestNews = () => fetchData('/1', processNewsData);
 exports.getLatestNews = getLatestNews;
@@ -120,7 +136,7 @@ const getLatestTikToks = () => fetchData('/10', processTikTokData);
 exports.getLatestTikToks = getLatestTikToks;
 const getAllTikToks = () => fetchData('/11', processTikTokData);
 exports.getAllTikToks = getAllTikToks;
-const getCareersByFaculty = async (facultyId) => {
+const getCareersByFaculty = (facultyId) => __awaiter(void 0, void 0, void 0, function* () {
     const cacheKey = `careers_by_faculty_${facultyId}`;
     const cachedData = cache.get(cacheKey);
     if (cachedData) {
@@ -128,7 +144,7 @@ const getCareersByFaculty = async (facultyId) => {
         return cachedData;
     }
     try {
-        const response = await exports.uteqApiClient.get(`/9/${facultyId}`);
+        const response = yield exports.uteqApiClient.get(`/9/${facultyId}`);
         const processedData = processCareerData(response.data);
         cache.set(cacheKey, processedData);
         console.log(`Cache set for ${cacheKey}`);
@@ -138,17 +154,17 @@ const getCareersByFaculty = async (facultyId) => {
         console.error(`Error al obtener las carreras para la facultad ${facultyId}:`, error);
         throw new Error('No se pudieron obtener las carreras para la facultad especificada.');
     }
-};
+});
 exports.getCareersByFaculty = getCareersByFaculty;
-const getFilteredContent = async (contentType, userEmail) => {
+const getFilteredContent = (contentType, userEmail) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userPreferences = await (0, auth_service_1.getPreferences)(userEmail); // Obtener preferencias del usuario
+        const userPreferences = yield (0, auth_service_1.getPreferences)(userEmail); // Obtener preferencias del usuario
         if (!userPreferences || userPreferences.preferences.length === 0) {
             // Si no hay preferencias, devolver los 10 últimos elementos del tipo de contenido
             switch (contentType) {
-                case 'news': return (await (0, exports.getLatestNews)()).slice(0, 10);
-                case 'weekly-summaries': return (await (0, exports.getLatestWeeklySummaries)()).slice(0, 10);
-                case 'tiktoks': return (await (0, exports.getLatestTikToks)()).slice(0, 10);
+                case 'news': return (yield (0, exports.getLatestNews)()).slice(0, 10);
+                case 'weekly-summaries': return (yield (0, exports.getLatestWeeklySummaries)()).slice(0, 10);
+                case 'tiktoks': return (yield (0, exports.getLatestTikToks)()).slice(0, 10);
                 default: return [];
             }
         }
@@ -156,13 +172,13 @@ const getFilteredContent = async (contentType, userEmail) => {
         let allContent = [];
         switch (contentType) {
             case 'news':
-                allContent = await (0, exports.getAllNews)();
+                allContent = yield (0, exports.getAllNews)();
                 break;
             case 'weekly-summaries':
-                allContent = await (0, exports.getAllWeeklySummaries)();
+                allContent = yield (0, exports.getAllWeeklySummaries)();
                 break;
             case 'tiktoks':
-                allContent = await (0, exports.getAllTikToks)();
+                allContent = yield (0, exports.getAllTikToks)();
                 break;
         }
         const filteredContent = allContent.filter((item) => {
@@ -180,5 +196,5 @@ const getFilteredContent = async (contentType, userEmail) => {
         console.error(`Error al obtener contenido filtrado de tipo ${contentType} para ${userEmail}:`, error);
         throw new Error(`No se pudieron obtener los ${contentType} filtrados.`);
     }
-};
+});
 exports.getFilteredContent = getFilteredContent;
