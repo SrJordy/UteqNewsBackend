@@ -1,86 +1,368 @@
-[
-  {
-    "id": "soft_gen_01",
-    "carrera": "software",
-    "categoria": "General",
-    "pregunta": "¿Cuántos semestres tiene la carrera? / ¿Cuánto tiempo dura la carrera? / ¿Cuál es la duración?",
-    "respuesta": "La carrera de Ingeniería de Software tiene una duración de 10 semestres (5 años aproximadamente)."
-  },
-  {
-    "id": "soft_malla_01",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en primer semestre? / Asignaturas del nivel 1",
-    "respuesta": "En el I Semestre (Primero) verás: Álgebra Lineal, Algoritmos y Lógica de Programación, Cálculo Diferencial, Introducción a la Ingeniería de Software, Estructuras Discretas I e Inglés I."
-  },
-  {
-    "id": "soft_malla_02",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en segundo semestre? / Asignaturas del nivel 2",
-    "respuesta": "En el II Semestre (Segundo) verás: Arquitectura de Computadoras, Cálculo Integral, Estructuras Discretas II, Fundamentos Físicos para Ingeniería (Física), Metodología de la Investigación, Programación Orientada a Objetos e Inglés II."
-  },
-  {
-    "id": "soft_malla_03",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en tercer semestre? / Asignaturas del nivel 3",
-    "respuesta": "En el III Semestre (Tercero) verás: Base de Datos, Estructura de Datos, Métodos Numéricos, Modelamiento de Software, Probabilidad y Estadística, Redacción Técnica e Inglés III."
-  },
-  {
-    "id": "soft_malla_04",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en cuarto semestre? / Asignaturas del nivel 4",
-    "respuesta": "En el IV Semestre (Cuarto) verás: Dinámica de Grupo y Comunicación, Fundamentos de Contabilidad y Finanzas, Ingeniería de Requerimientos, Interacción Hombre-Máquina, Investigación de Operaciones, Sistemas Operativos e Inglés IV."
-  },
-  {
-    "id": "soft_malla_05",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en quinto semestre? / Asignaturas del nivel 5",
-    "respuesta": "En el V Semestre (Quinto) verás: Administración de Base de Datos, Aplicaciones Web, Diseño y Arquitectura de Software, Modelos Matemáticos y Simulación, Verificación y Validación de Software e Inglés V."
-  },
-  {
-    "id": "soft_malla_06",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en sexto semestre? / Asignaturas del nivel 6",
-    "respuesta": "En el VI Semestre (Sexto) verás: Administración de Plataformas de Software, Aplicaciones Móviles, Construcción de Software, Proceso de Software, Redes de Datos e Inglés VI."
-  },
-  {
-    "id": "soft_malla_07",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en séptimo semestre? / Asignaturas del nivel 7",
-    "respuesta": "En el VII Semestre (Séptimo) verás: Aplicaciones Distribuidas, Calidad del Software, Inteligencia de Negocios, Mantenimiento de Software, Seguridad Informática e Inglés VII."
-  },
-  {
-    "id": "soft_malla_08",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en octavo semestre? / Asignaturas del nivel 8",
-    "respuesta": "En el VIII Semestre (Octavo) verás: Deontología Informática (Ética), Gestión de la Configuración de Software, Herramientas de Programación, Ingeniería Económica para Software, Modelos de Decisión y Optimización e Inglés VIII."
-  },
-  {
-    "id": "soft_malla_09",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en noveno semestre? / Asignaturas del nivel 9",
-    "respuesta": "En el IX Semestre (Noveno) verás: Ciencia, Tecnología y Sociedad, Formulación del Trabajo de Titulación, Gestión de Tecnologías de la Información, Realidad Nacional y Saberes Ancestrales, y Sistemas Inteligentes (IA)."
-  },
-  {
-    "id": "soft_malla_10",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Qué materias se ven en décimo semestre? / Asignaturas del nivel 10 / Ultimo semestre",
-    "respuesta": "En el X Semestre (Décimo) verás: Desarrollo del Trabajo de Titulación (Tesis), Legislación Informática, Liderazgo y Emprendimiento, Programación en la Nube y Redacción de Documentos Científicos."
-  },
-  {
-    "id": "soft_full_list",
-    "carrera": "software",
-    "categoria": "Malla Curricular",
-    "pregunta": "¿Cuáles son todas las materias de la carrera? / Malla curricular completa",
-    "respuesta": "La carrera abarca desde fundamentos como Álgebra y Algoritmos, pasando por desarrollo puro como Aplicaciones Web, Móviles y Distribuidas, hasta temas avanzados como Sistemas Inteligentes y Programación en la Nube. Puedes ver el gráfico oficial aquí: https://www.uteq.edu.ec/assets/images/careers/degrees/academic/img-uteq-malla-000030.jpg"
-  }
-]
+{
+  "software": [
+    {
+      "id": "soft_dev_info",
+      "carrera": "software",
+      "categoria": "Sistema",
+      "pregunta": "¿Quién hizo este sistema? / ¿Quién es el desarrollador? / ¿Quién creó la app? / ¿Quién programó el chatbot?",
+      "respuesta": "¡Hola! Este sistema fue desarrollado por el Ingeniero Jordy Alejandro Vilcacundo Chiluisa, parte del equipo de Hellheim System. Trabajamos creando tecnología innovadora y soluciones digitales."
+    },
+    {
+      "id": "soft_gen_01",
+      "carrera": "software",
+      "categoria": "General",
+      "pregunta": "¿Cuántos semestres tiene la carrera? / ¿Cuánto tiempo dura la carrera? / ¿Cuál es la duración?",
+      "respuesta": "La carrera está diseñada para completarse en 10 semestres. Son 5 años de preparación donde pasarás de no saber nada a ser un profesional capaz de crear tecnología."
+    },
+    {
+      "id": "soft_malla_01",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en primer semestre? / Asignaturas del nivel 1 / ¿Qué veré al iniciar?",
+      "respuesta": "En tu primer nivel sentarás las bases. Verás: Álgebra Lineal, Algoritmos (donde aprendes a pensar como programador), Cálculo Diferencial, Introducción a la Ingeniería, Estructuras Discretas e Inglés I. ¡Es el comienzo de todo!"
+    },
+    {
+      "id": "soft_malla_02",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en segundo semestre? / Asignaturas del nivel 2",
+      "respuesta": "En segundo nivel subimos el nivel: Arquitectura de Computadoras (cómo funciona el hardware), Cálculo Integral, Física, Metodología de la Investigación y tu primera materia fuerte de código: Programación Orientada a Objetos."
+    },
+    {
+      "id": "soft_malla_03",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en tercer semestre? / Asignaturas del nivel 3",
+      "respuesta": "Aquí la cosa se pone interesante. Verás Base de Datos (donde se guarda la info), Estructura de Datos (cómo organizarla), Métodos Numéricos, Probabilidad y Estadística. Es un semestre clave para tu lógica."
+    },
+    {
+      "id": "soft_malla_04",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en cuarto semestre? / Asignaturas del nivel 4",
+      "respuesta": "En cuarto nivel aprenderás sobre Sistemas Operativos, Ingeniería de Requerimientos (entender qué quiere el cliente), Contabilidad básica y cómo interactúan los humanos con las máquinas."
+    },
+    {
+      "id": "soft_malla_05",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en quinto semestre? / Asignaturas del nivel 5",
+      "respuesta": "¡Mitad de carrera! Aquí entras de lleno al desarrollo con Aplicaciones Web, Diseño de Software y Administración de Bases de Datos. Ya empezarás a crear cosas funcionales y visibles."
+    },
+    {
+      "id": "soft_malla_06",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en sexto semestre? / Asignaturas del nivel 6",
+      "respuesta": "Este semestre es muy dinámico: Verás Aplicaciones Móviles (¡Apps para celular!), Redes de Datos y procesos para construir software de calidad. Es un nivel muy práctico."
+    },
+    {
+      "id": "soft_malla_07",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en séptimo semestre? / Asignaturas del nivel 7",
+      "respuesta": "Nivel avanzado: Aplicaciones Distribuidas, Inteligencia de Negocios (datos para empresas) y una favorita de muchos: Seguridad Informática. Aquí aprendes a proteger lo que construyes."
+    },
+    {
+      "id": "soft_malla_08",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en octavo semestre? / Asignaturas del nivel 8",
+      "respuesta": "Ya casi eres ingeniero. Verás Ética profesional, Gestión de configuración y materias sobre cómo tomar decisiones y optimizar proyectos. Te preparas para el mundo laboral real."
+    },
+    {
+      "id": "soft_malla_09",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en noveno semestre? / Asignaturas del nivel 9",
+      "respuesta": "La recta final. Aquí verás Sistemas Inteligentes (¡Inteligencia Artificial!) y empezarás a formular tu proyecto de tesis. Es un semestre de mucha innovación."
+    },
+    {
+      "id": "soft_malla_10",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Qué materias se ven en décimo semestre? / Asignaturas del nivel 10 / Ultimo semestre",
+      "respuesta": "¡El último paso! Aquí te dedicas a tu Trabajo de Titulación (Tesis), aprendes sobre leyes informáticas, Liderazgo y Programación en la Nube. Al terminar esto, serás colega."
+    },
+    {
+      "id": "soft_full_list",
+      "carrera": "software",
+      "categoria": "Malla Curricular",
+      "pregunta": "¿Cuáles son todas las materias de la carrera? / Malla curricular completa",
+      "respuesta": "Es un viaje completo: empiezas con números y lógica, pasas a programar webs y apps, aprendes a gestionar bases de datos y terminas dominando la Inteligencia Artificial y la Nube. Puedes ver el mapa completo aquí: https://www.uteq.edu.ec/assets/images/careers/degrees/academic/img-uteq-malla-000030.jpg"
+    },
+    {
+      "id": "soft_ext_01",
+      "carrera": "software",
+      "categoria": "Videojuegos",
+      "pregunta": "¿Estudiar ingeniería de software me ayudará a programar un juego? / ¿Qué necesitas para comenzar a crear juegos? / ¿Se pueden hacer juegos en esta carrera?",
+      "respuesta": "¡Totalmente! Los videojuegos son puro software. Aquí aprenderás la lógica y los lenguajes (como C# o C++) que usan los grandes estudios. Muchos estudiantes presentan juegos increíbles como proyectos finales. Si te apasiona, ¡aquí te damos las herramientas para crearlos!"
+    },
+    {
+      "id": "soft_ext_02",
+      "carrera": "software",
+      "categoria": "Campo Laboral - IA",
+      "pregunta": "¿Los ingenieros de software serán reemplazados por la IA en un futuro? / ¿La IA me quitará el empleo?",
+      "respuesta": "¡Para nada! Piénsalo así: la IA es como un auto súper veloz, pero necesita un piloto. Tú serás ese piloto. Aprenderás a usar la IA para trabajar más rápido y crear cosas mejores. Lejos de reemplazarte, te hará más poderoso profesionalmente."
+    },
+    {
+      "id": "soft_ext_03",
+      "carrera": "software",
+      "categoria": "Economía",
+      "pregunta": "¿En promedio cuáles son las ganancias? / ¿Cuánto gana un ingeniero de software? / ¿Es rentable la carrera? / ¿Ganan bien?",
+      "respuesta": "Sin duda, es una de las carreras mejor pagadas del mundo hoy en día. Si eres bueno y aprendes inglés, puedes trabajar desde tu casa para empresas de EE.UU. o Europa ganando en dólares, sueldos que son muy difíciles de conseguir en otras profesiones locales."
+    },
+    {
+      "id": "soft_ext_04",
+      "carrera": "software",
+      "categoria": "Comparativa",
+      "pregunta": "¿Qué diferencia existe entre la carrera de software y sistemas? / ¿Es más difícil software o sistemas?",
+      "respuesta": "Son familia, pero con gustos distintos. 'Sistemas' se enfoca en que todo funcione (redes, servidores, equipos). 'Software' se enfoca en CREAR (programas, aplicaciones, webs). Si te gusta construir cosas digitales desde cero, Software es tu lugar."
+    },
+    {
+      "id": "soft_ext_05",
+      "carrera": "software",
+      "categoria": "Dificultad",
+      "pregunta": "¿Ingeniería de software tiene un nivel de esfuerzo alto? / ¿Es difícil la carrera? / ¿Es estresante?",
+      "respuesta": "Te seré sincero: requiere dedicación. Habrá días en que un código no funcione y te frustres, pero cuando encuentras el error y todo corre perfecto, la satisfacción es enorme. No es una carrera imposible, solo necesitas curiosidad y no rendirte."
+    },
+    {
+      "id": "soft_ext_06",
+      "carrera": "software",
+      "categoria": "Idioma",
+      "pregunta": "¿El inglés es fundamental en la carrera? / ¿Todos los lenguajes de programación son en inglés?",
+      "respuesta": "El inglés será tu mejor amigo. Los códigos se escriben en inglés (palabras como 'if', 'for', 'print'). No necesitas ser bilingüe para empezar, la U te enseña, pero si le pones ganas al idioma, se te abrirán las puertas a los mejores sueldos internacionales."
+    },
+    {
+      "id": "soft_ext_07",
+      "carrera": "software",
+      "categoria": "Modalidad de Estudio",
+      "pregunta": "¿Podría estudiar y trabajar al mismo tiempo? / ¿Tendré tiempo libre?",
+      "respuesta": "¡Sí se puede! Muchos compañeros lo hacen. La clave es organizarte bien. Al principio tendrás más tiempo libre, luego los proyectos exigirán más dedicación, pero si gestionas tu agenda, podrás trabajar, estudiar y hasta tener vida social."
+    },
+    {
+      "id": "soft_ext_08",
+      "carrera": "software",
+      "categoria": "Matemáticas",
+      "pregunta": "¿La carrera usa mucha matemática? / ¿Es necesario saber matemáticas para entrar? / ¿Hay muchas materias de números?",
+      "respuesta": "Es normal tenerle miedo a los números, pero tranquilo. Sí vemos matemáticas (Cálculo, Estadística) para entrenar tu cerebro y lógica, pero no estarás calculando todo el día. Son una etapa necesaria, y con práctica y apoyo de los profes, ¡se aprueban!"
+    },
+    {
+      "id": "soft_ext_09",
+      "carrera": "software",
+      "categoria": "Hardware vs Software",
+      "pregunta": "¿En la carrera vemos componentes de aparatos electrónicos? / ¿Se aprende a arreglar computadoras? / ¿Software es para componer PC?",
+      "respuesta": "¡Ojo con esto! Nosotros somos los arquitectos del mundo digital, no técnicos de reparación. No aprenderás a desarmar computadoras ni a arreglar impresoras. Aprenderás a crear la magia que ocurre DENTRO de la pantalla: las apps, los juegos y los sistemas."
+    },
+    {
+      "id": "soft_ext_10",
+      "carrera": "software",
+      "categoria": "Deserción",
+      "pregunta": "¿Por qué casi nadie se gradúa de la carrera? / ¿Por qué los estudiantes se retiran?",
+      "respuesta": "A veces entran pensando que solo jugarán en la PC, y se asustan cuando ven que hay que pensar y usar lógica. Pero el secreto es simple: perseverancia. Si te gusta la tecnología y eres curioso, no serás parte de los que se van, ¡serás de los que se gradúan!"
+    },
+    {
+      "id": "soft_ext_11",
+      "carrera": "software",
+      "categoria": "Recursos",
+      "pregunta": "¿Qué equipos tengo que tener? / ¿Necesito una PC gamer? / ¿Qué recursos necesito?",
+      "respuesta": "No necesitas gastar una fortuna en una PC Gamer. Una laptop normal (Core i5 o Ryzen 5 con 8GB de RAM) es suficiente para casi toda la carrera. Lo más valioso que necesitas traer son tus ganas de aprender y tu creatividad."
+    },
+    {
+      "id": "soft_ext_12",
+      "carrera": "software",
+      "categoria": "Ciberseguridad",
+      "pregunta": "¿Podré hackear? / ¿Software se beneficia con ciberseguridad? / ¿Aprenderemos a hackear?",
+      "respuesta": "¡Sí! Pero serás un hacker de los buenos (White Hat). Aprenderás Seguridad Informática y Hacking Ético para entender cómo atacan los ciberdelincuentes y así poder crear sistemas blindados y seguros. Es un área fascinante."
+    },
+    {
+      "id": "soft_ext_13",
+      "carrera": "software",
+      "categoria": "Lenguajes",
+      "pregunta": "¿Qué lenguajes nos enseñarán? / ¿Cuál es el primer lenguaje? / ¿Cuántos lenguajes dominaré?",
+      "respuesta": "Empezarás entrenando tu lógica. Luego aprenderás lenguajes poderosos como Java, C#, Python y tecnologías web como JavaScript. Pero lo importante no es memorizarlos, sino entender cómo funcionan; así podrás aprender cualquier lenguaje nuevo en el futuro facilito."
+    },
+    {
+      "id": "soft_ext_14",
+      "carrera": "software",
+      "categoria": "Coordinación - Admisión",
+      "pregunta": "¿Qué puntaje se necesita para ingresar? / ¿Cuál es el puntaje mínimo?",
+      "respuesta": "Los puntajes cambian cada semestre según cuánta gente postule. Lo mejor es que revises las páginas oficiales de Admisión de la UTEQ o preguntes en secretaría para tener el dato exacto de hoy. ¡No te desanimes y postula!"
+    },
+    {
+      "id": "soft_ext_15",
+      "carrera": "software",
+      "categoria": "Futuro",
+      "pregunta": "¿La carrera de software sería rentable para el 2028? / ¿Tendrá alta demanda a futuro? / ¿Es la carrera del futuro?",
+      "respuesta": "¡Es la carrera del presente y del futuro! Mira a tu alrededor: todo es digital. Bancos, hospitales, escuelas... todos necesitan software. Para el 2028 se necesitarán millones de ingenieros más. Tienes trabajo asegurado si eres bueno."
+    },
+    {
+      "id": "soft_ext_16",
+      "carrera": "software",
+      "categoria": "Perfil de Ingreso",
+      "pregunta": "¿Si no soy bueno en eso podré aprobar? / ¿Qué pasa si no sé nada de compu? / ¿Necesito ser bachiller en informática?",
+      "respuesta": "¡Cero estrés! No necesitas saber programar ni ser bachiller informático para entrar. La carrera está diseñada para enseñarte desde cero, paso a paso. Solo necesitas curiosidad y no tener miedo a equivocarte y volver a intentar."
+    },
+    {
+      "id": "soft_ext_17",
+      "carrera": "software",
+      "categoria": "Salud Mental",
+      "pregunta": "¿Al finalizar la carrera saldré con buena salud mental? / ¿Es muy estresante?",
+      "respuesta": "Como todo lo que vale la pena, exigirá esfuerzo y habrá días cansados. Pero la satisfacción de ver tus creaciones funcionando lo compensa todo. Además, en la UTEQ promovemos el deporte y el compañerismo para que mantengas tu mente sana y despejada."
+    },
+    {
+      "id": "soft_ext_18",
+      "carrera": "software",
+      "categoria": "Emprendimiento",
+      "pregunta": "¿Qué clase de emprendimientos pueden hacerse? / ¿La carrera me ayudaría a tener mi propia empresa?",
+      "respuesta": "Es la mejor carrera para emprender. No necesitas fábricas ni bodegas, solo tu cerebro y una compu. Puedes lanzar tu propia App, crear una agencia de sitios web, desarrollar un videojuego... ¡El límite es tu imaginación!"
+    },
+    {
+      "id": "soft_ext_19",
+      "carrera": "software",
+      "categoria": "Prácticas",
+      "pregunta": "¿En qué semestre son las prácticas? / ¿Las pasantías son en empresas?",
+      "respuesta": "Las prácticas suelen empezar en 7mo semestre. Lo genial es que vas a empresas reales (o instituciones públicas) a aplicar lo que aprendiste, ganando experiencia antes de graduarte."
+    },
+    {
+      "id": "soft_ext_20",
+      "carrera": "software",
+      "categoria": "Trabajo Internacional",
+      "pregunta": "¿Es posible trabajar en el extranjero? / ¿Dónde conseguiría trabajo?",
+      "respuesta": "El código es un idioma universal. Si sabes programar en Ecuador, sabes programar en Japón o Alemania. Esta carrera te permite trabajar remotamente para cualquier lugar del mundo sin salir de tu casa, o emigrar con un título muy valorado."
+    },
+    {
+      "id": "soft_ext_21",
+      "carrera": "software",
+      "categoria": "Áreas de Trabajo",
+      "pregunta": "¿En qué áreas puede trabajar un ingeniero? / ¿De qué puedo trabajar?",
+      "respuesta": "¡El campo es inmenso! Puedes ser Creador de Webs, Desarrollador de Apps Móviles, Experto en Inteligencia Artificial, Hacker Ético, Gestor de Proyectos Tecnológicos, Científico de Datos... ¡Tú eliges tu especialidad!"
+    },
+    {
+      "id": "soft_ext_22",
+      "carrera": "software",
+      "categoria": "Preparación Previa",
+      "pregunta": "¿Qué acciones tomar para estar preparado al iniciar? / ¿Cómo podría 'enamorarme' de la carrera?",
+      "respuesta": "Mi consejo: curiosea. Busca tutoriales básicos en YouTube, intenta hacer una página web sencilla. La mejor forma de enamorarse de esto es sentir la magia de escribir un código y ver que la computadora hace exactamente lo que tú le dijiste."
+    },
+    {
+      "id": "soft_ext_23",
+      "carrera": "software",
+      "categoria": "Coordinación - Tesis",
+      "pregunta": "¿Cómo es el proceso de tesis? / ¿Es difícil graduarse?",
+      "respuesta": "Al final de la carrera harás un proyecto de Titulación. No lo veas como un obstáculo, sino como tu obra maestra: crearás una solución tecnológica real con la guía de un tutor. ¡Es tu oportunidad de demostrar todo lo que aprendiste!"
+    },
+    {
+      "id": "soft_ext_24",
+      "carrera": "software",
+      "categoria": "Vida Estudiantil",
+      "pregunta": "¿Hay compañerismo? / ¿Es importante la comunicación?",
+      "respuesta": "¡Muchísimo! En el software, los lobos solitarios no llegan lejos. Aprenderás a trabajar en equipo (con metodologías ágiles), harás amigos para toda la vida y descubrirás que programar entre amigos es mucho más divertido y productivo."
+    },
+    {
+      "id": "soft_ext_25",
+      "carrera": "software",
+      "categoria": "Investigación",
+      "pregunta": "¿Dónde hallar artículos confiables? / ¿Hay recursos de biblioteca?",
+      "respuesta": "La U te da acceso a bibliotecas físicas y virtuales de primer nivel. Aprenderás a buscar en bases de datos científicas (como IEEE o Scopus) donde publican los verdaderos expertos, para que tu información sea siempre veraz y actual."
+    },
+    {
+      "id": "soft_ext_26",
+      "carrera": "software",
+      "categoria": "Sistemas Operativos",
+      "pregunta": "¿Se puede hacer un sistema operativo? / ¿Cómo funciona un software?",
+      "respuesta": "Entenderás cómo funcionan las 'tripas' de la computadora en la materia de Sistemas Operativos. Crear uno desde cero es un reto de grandes ligas, pero tendrás el conocimiento para entender cómo gestionan la memoria y los procesos."
+    },
+    {
+      "id": "soft_ext_27",
+      "carrera": "software",
+      "categoria": "Motivación",
+      "pregunta": "¿Vale la pena ingresar a la carrera? / ¿Seré feliz en esta carrera?",
+      "respuesta": "Si te gusta innovar, resolver acertijos y crear cosas nuevas, ¡serás muy feliz! Es una carrera que nunca aburre porque la tecnología cambia todos los días. Ver que tu trabajo ayuda a la gente es una sensación increíble."
+    },
+    {
+      "id": "soft_ext_28",
+      "carrera": "software",
+      "categoria": "Coordinación - Modalidad",
+      "pregunta": "¿Puedo estudiar a distancia? / ¿Dónde son las clases presenciales?",
+      "respuesta": "Generalmente la Ingeniería de Software requiere que estés presencialmente para aprovechar los laboratorios y el trabajo en equipo. Te recomiendo consultar la oferta vigente de la UTEQ para este periodo específico."
+    },
+    {
+      "id": "soft_ext_29",
+      "carrera": "software",
+      "categoria": "Laboratorios",
+      "pregunta": "¿Hay laboratorio de computación? / ¿Las aulas son buenas?",
+      "respuesta": "Sí, contamos con laboratorios equipados para las prácticas. Aunque siempre es genial si puedes traer tu propia laptop para llevar tus proyectos a casa, la universidad te da las herramientas necesarias para aprender."
+    },
+    {
+      "id": "soft_ext_30",
+      "carrera": "software",
+      "categoria": "General",
+      "pregunta": "¿Qué es lo primordial que se debe saber al escoger la carrera? / ¿Cuál es el objetivo?",
+      "respuesta": "Lo principal es saber que aquí venimos a **resolver problemas**. No solo escribimos código, creamos soluciones para mejorar la vida de las personas. Si tienes ganas de cambiar el mundo con tecnología, estás en el lugar correcto."
+    },
+    {
+      "id": "soft_add_31",
+      "carrera": "software",
+      "categoria": "Proyectos",
+      "pregunta": "¿Los programas que hacemos serán expuestos a una casa abierta? / ¿Nuestros proyectos saldrán en casas abiertas?",
+      "respuesta": "¡Claro que sí! Y es súper emocionante. En las Casas Abiertas de la facultad podrás presumir tus mejores proyectos ante otros estudiantes y profesores. Es tu momento de fama y una gran oportunidad para hacer networking."
+    },
+    {
+      "id": "soft_add_32",
+      "carrera": "software",
+      "categoria": "Desarrollo Móvil",
+      "pregunta": "¿Se puede programar en un teléfono? / ¿Vamos a crear aplicaciones para celular?",
+      "respuesta": "Sí. Verás materias exclusivas para crear aplicaciones móviles. Aprenderás a hacer esas apps que usas todos los días en tu Android o iPhone. ¡Imagínate ver tu propia App instalada en el teléfono de tus amigos!"
+    },
+    {
+      "id": "soft_add_33",
+      "carrera": "software",
+      "categoria": "Desarrollo Web",
+      "pregunta": "¿Se puede crear una página web? / ¿Aprenderemos a hacer sitios web?",
+      "respuesta": "¡Por supuesto! El desarrollo web es clave. Aprenderás a crear desde sitios informativos bonitos hasta plataformas complejas con usuarios y bases de datos. Saldrás preparado para ser un Full Stack Developer."
+    },
+    {
+      "id": "soft_add_34",
+      "carrera": "software",
+      "categoria": "Formación",
+      "pregunta": "¿Podré hacer una maestría? / ¿Qué sigue después de graduarme?",
+      "respuesta": "¡El cielo es el límite! Tu título de Ingeniero te habilita para seguir creciendo con Maestrías y Doctorados, tanto aquí en Ecuador como en universidades del extranjero."
+    },
+    {
+      "id": "soft_add_35",
+      "carrera": "software",
+      "categoria": "Estilo de Vida",
+      "pregunta": "¿Qué tipo de vida tienen las personas que se gradúan en software? / ¿Cómo es la vida de un ingeniero?",
+      "respuesta": "Solemos tener un estilo de vida moderno y flexible. Muchos disfrutamos del teletrabajo, ambientes laborales relajados y buen compañerismo. Eso sí, nunca dejamos de aprender porque la tecnología siempre avanza."
+    },
+    {
+      "id": "soft_add_36",
+      "carrera": "software",
+      "categoria": "Autodidacta vs Universidad",
+      "pregunta": "¿Cuál es la diferencia de estar en la uni o aprender a programar por mi cuenta?",
+      "respuesta": "En YouTube aprendes a 'codificar'. En la U aprendes a ser 'Ingeniero': a liderar proyectos gigantes, a trabajar en equipo, a diseñar arquitecturas que no fallen y a tener ética profesional. La U te da la estructura mental de un líder."
+    },
+    {
+      "id": "soft_add_37",
+      "carrera": "software",
+      "categoria": "Rol Profesional",
+      "pregunta": "¿Qué ingenieros se encuentran en la carrera? / ¿Cómo me llamarán al graduarme?",
+      "respuesta": "Te formarás con expertos: Ingenieros en Sistemas, en Software y Doctores en computación. Al final, llevarás con orgullo el título de **Ingeniero/a de Software**."
+    },
+    {
+      "id": "soft_add_38",
+      "carrera": "software",
+      "categoria": "Curiosidad",
+      "pregunta": "¿Por qué es la carrera más elegida? / ¿Por qué tiene tanta demanda?",
+      "respuesta": "Porque combina lo mejor de todo: creatividad, buenos sueldos y la libertad de trabajar donde quieras. Además, saber que estás construyendo el futuro es una motivación que atrae a muchos."
+    },
+    {
+      "id": "soft_add_39",
+      "carrera": "software",
+      "categoria": "Exclusividad",
+      "pregunta": "¿Veré solo código durante la carrera? / ¿En la carrera todo será programación?",
+      "respuesta": "El código es el corazón, pero no lo es todo. También aprenderás a hablar en público, a gestionar proyectos, a diseñar interfaces bonitas (UX/UI) y a entender el negocio. Formamos profesionales completos, no robots."
+    }
+  ]
+}

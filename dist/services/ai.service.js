@@ -18,7 +18,7 @@ const vector_service_1 = require("./vector.service");
 // Configuración de OpenRouter
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.GOOGLE_API_KEY;
 const SITE_URL = 'https://uteq.edu.ec';
-const APP_NAME = 'UTEQ News App';
+const APP_NAME = 'PreSoft - Carrera de Software UTEQ';
 if (!OPENROUTER_API_KEY) {
     console.warn('⚠️ OPENROUTER_API_KEY no está definida. El chat de IA no funcionará correctamente.');
 }

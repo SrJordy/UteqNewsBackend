@@ -2,7 +2,6 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
-import { getFaculties, getCareers } from './uteqApi.service';
 
 // sql.js usa CommonJS, importamos dinámicamente
 let SQL: any = null;
@@ -22,12 +21,31 @@ interface FaqItem {
     respuesta: string;
 }
 
-// Cargar FAQ desde archivo JSON
+// Interfaz para estructura del JSON
+interface FaqData {
+    software: FaqItem[];
+    [key: string]: FaqItem[]; // Para futuras carreras
+}
+
+// Cargar FAQ desde archivo JSON (nueva estructura con objeto)
 const loadFaqData = (): FaqItem[] => {
     try {
         if (fs.existsSync(FAQ_PATH)) {
             const data = fs.readFileSync(FAQ_PATH, 'utf-8');
-            return JSON.parse(data);
+            const parsed: FaqData = JSON.parse(data);
+
+            // Por ahora solo cargamos "software", pero preparado para múltiples carreras
+            const allFaqs: FaqItem[] = [];
+
+            if (parsed.software && Array.isArray(parsed.software)) {
+                allFaqs.push(...parsed.software);
+            }
+
+            // Aquí se pueden agregar más carreras en el futuro:
+            // if (parsed.sistemas) allFaqs.push(...parsed.sistemas);
+
+            console.log(`📚 Cargadas ${allFaqs.length} preguntas FAQ de la carrera de Software.`);
+            return allFaqs;
         }
     } catch (error) {
         console.error('⚠️ Error cargando FAQ:', error);
@@ -124,17 +142,16 @@ const cosineSimilarity = (a: number[], b: number[]): number => {
     return dotProduct / (magnitudeA * magnitudeB);
 };
 
-// Sincronizar vector store
+// Sincronizar vector store - SOLO FAQ de Software
 export const syncVectorStore = async (): Promise<void> => {
-    console.log('🔄 Sincronizando base de datos vectorial...');
+    console.log('🔄 Sincronizando base de datos vectorial (PreSoft - Solo FAQ Software)...');
 
     try {
         const database = await initDatabase();
 
-        // 1. Obtener datos de APIs y FAQ
-        const [faculties, careers] = await Promise.all([getFaculties(), getCareers()]);
+        // 1. Obtener datos solo del FAQ de Software
         const faqData = loadFaqData();
-        const allData = { faculties, careers, faq: faqData };
+        const allData = { faq: faqData };
 
         // 2. Calcular hash
         const currentHash = computeHash(allData);
@@ -154,37 +171,11 @@ export const syncVectorStore = async (): Promise<void> => {
         // 5. Limpiar vectores
         database.run('DELETE FROM vectors');
 
-        // 6. Procesar facultades
-        console.log(`📚 Procesando ${faculties.length} facultades...`);
-        for (const f of faculties) {
-            const text = `Facultad: ${f.name}. Misión: ${f.mission || 'No disponible'}. Visión: ${f.vision || 'No disponible'}.`;
-            const embedding = await generateEmbedding(text);
-            if (embedding.length > 0) {
-                database.run(
-                    'INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)',
-                    [`faculty-${f.id}`, text, 'faculty', JSON.stringify(embedding), JSON.stringify(f)]
-                );
-            }
-        }
-
-        // 7. Procesar carreras
-        console.log(`🎓 Procesando ${careers.length} carreras...`);
-        for (const c of careers) {
-            const text = `Carrera: ${c.name}. Descripción: ${c.description || 'No disponible'}. URL: ${c.careerUrl}.`;
-            const embedding = await generateEmbedding(text);
-            if (embedding.length > 0) {
-                database.run(
-                    'INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)',
-                    [`career-${c.name}`, text, 'career', JSON.stringify(embedding), JSON.stringify(c)]
-                );
-            }
-        }
-
-        // 8. Procesar FAQ de carreras
-        console.log(`❓ Procesando ${faqData.length} preguntas frecuentes...`);
+        // 6. Procesar FAQ de Software
+        console.log(`❓ Procesando ${faqData.length} preguntas frecuentes de Software...`);
         for (const faq of faqData) {
             // Combinar pregunta y respuesta para mejor embedding
-            const text = `[FAQ - ${faq.carrera.toUpperCase()}] Pregunta: ${faq.pregunta}. Respuesta: ${faq.respuesta}`;
+            const text = `[FAQ - Ingeniería de Software] Pregunta: ${faq.pregunta}. Respuesta: ${faq.respuesta}`;
             const embedding = await generateEmbedding(text);
             if (embedding.length > 0) {
                 database.run(
@@ -194,15 +185,15 @@ export const syncVectorStore = async (): Promise<void> => {
             }
         }
 
-        // 9. Guardar hash
+        // 7. Guardar hash
         database.run("INSERT OR REPLACE INTO metadata (key, value) VALUES ('data_hash', ?)", [currentHash]);
 
-        // 10. Guardar BD
+        // 8. Guardar BD
         saveDatabase();
 
         const countResult = database.exec('SELECT COUNT(*) FROM vectors');
         const count = countResult.length > 0 ? countResult[0].values[0][0] : 0;
-        console.log(`✅ Base de datos vectorial sincronizada con ${count} registros.`);
+        console.log(`✅ Base de datos vectorial sincronizada con ${count} registros FAQ.`);
 
     } catch (error) {
         console.error('❌ Error sincronizando vector store:', error);
@@ -244,13 +235,9 @@ export const searchContext = async (query: string, limit: number = 5): Promise<s
         results.sort((a: any, b: any) => b.score - a.score);
         const topResults = results.slice(0, limit);
 
-        // 5. Formatear contexto según el tipo
+        // 5. Formatear contexto - Solo FAQs
         const contextParts = topResults.map((r: any) => {
-            if (r.type === 'faq') {
-                // Para FAQ, solo devolver la respuesta directa
-                return `[Pregunta Frecuente] ${r.metadata.respuesta}`;
-            }
-            return r.text;
+            return `[Pregunta Frecuente] ${r.metadata.respuesta}`;
         });
 
         return contextParts.join('\n\n');
@@ -262,5 +249,5 @@ export const searchContext = async (query: string, limit: number = 5): Promise<s
 };
 
 // Inicializar al importar
-console.log('🚀 Vector service cargado. Sincronizando en segundo plano...');
+console.log('🚀 Vector service (PreSoft) cargado. Sincronizando en segundo plano...');
 syncVectorStore().catch(err => console.error('Error en sincronización inicial:', err));

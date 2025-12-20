@@ -17,7 +17,6 @@ const crypto_1 = __importDefault(require("crypto"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const axios_1 = __importDefault(require("axios"));
-const uteqApi_service_1 = require("./uteqApi.service");
 // sql.js usa CommonJS, importamos dinámicamente
 let SQL = null;
 let db = null;
@@ -25,12 +24,21 @@ let db = null;
 const DB_PATH = path_1.default.join(__dirname, '../../data/vectors.db');
 const FAQ_PATH = path_1.default.join(__dirname, '../../data/faq_carreras.json');
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.GOOGLE_API_KEY;
-// Cargar FAQ desde archivo JSON
+// Cargar FAQ desde archivo JSON (nueva estructura con objeto)
 const loadFaqData = () => {
     try {
         if (fs_1.default.existsSync(FAQ_PATH)) {
             const data = fs_1.default.readFileSync(FAQ_PATH, 'utf-8');
-            return JSON.parse(data);
+            const parsed = JSON.parse(data);
+            // Por ahora solo cargamos "software", pero preparado para múltiples carreras
+            const allFaqs = [];
+            if (parsed.software && Array.isArray(parsed.software)) {
+                allFaqs.push(...parsed.software);
+            }
+            // Aquí se pueden agregar más carreras en el futuro:
+            // if (parsed.sistemas) allFaqs.push(...parsed.sistemas);
+            console.log(`📚 Cargadas ${allFaqs.length} preguntas FAQ de la carrera de Software.`);
+            return allFaqs;
         }
     }
     catch (error) {
@@ -119,15 +127,14 @@ const cosineSimilarity = (a, b) => {
     const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
     return dotProduct / (magnitudeA * magnitudeB);
 };
-// Sincronizar vector store
+// Sincronizar vector store - SOLO FAQ de Software
 const syncVectorStore = () => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('🔄 Sincronizando base de datos vectorial...');
+    console.log('🔄 Sincronizando base de datos vectorial (PreSoft - Solo FAQ Software)...');
     try {
         const database = yield initDatabase();
-        // 1. Obtener datos de APIs y FAQ
-        const [faculties, careers] = yield Promise.all([(0, uteqApi_service_1.getFaculties)(), (0, uteqApi_service_1.getCareers)()]);
+        // 1. Obtener datos solo del FAQ de Software
         const faqData = loadFaqData();
-        const allData = { faculties, careers, faq: faqData };
+        const allData = { faq: faqData };
         // 2. Calcular hash
         const currentHash = computeHash(allData);
         // 3. Obtener hash almacenado
@@ -141,41 +148,23 @@ const syncVectorStore = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log('📝 Detectados cambios, regenerando embeddings...');
         // 5. Limpiar vectores
         database.run('DELETE FROM vectors');
-        // 6. Procesar facultades
-        console.log(`📚 Procesando ${faculties.length} facultades...`);
-        for (const f of faculties) {
-            const text = `Facultad: ${f.name}. Misión: ${f.mission || 'No disponible'}. Visión: ${f.vision || 'No disponible'}.`;
-            const embedding = yield generateEmbedding(text);
-            if (embedding.length > 0) {
-                database.run('INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)', [`faculty-${f.id}`, text, 'faculty', JSON.stringify(embedding), JSON.stringify(f)]);
-            }
-        }
-        // 7. Procesar carreras
-        console.log(`🎓 Procesando ${careers.length} carreras...`);
-        for (const c of careers) {
-            const text = `Carrera: ${c.name}. Descripción: ${c.description || 'No disponible'}. URL: ${c.careerUrl}.`;
-            const embedding = yield generateEmbedding(text);
-            if (embedding.length > 0) {
-                database.run('INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)', [`career-${c.name}`, text, 'career', JSON.stringify(embedding), JSON.stringify(c)]);
-            }
-        }
-        // 8. Procesar FAQ de carreras
-        console.log(`❓ Procesando ${faqData.length} preguntas frecuentes...`);
+        // 6. Procesar FAQ de Software
+        console.log(`❓ Procesando ${faqData.length} preguntas frecuentes de Software...`);
         for (const faq of faqData) {
             // Combinar pregunta y respuesta para mejor embedding
-            const text = `[FAQ - ${faq.carrera.toUpperCase()}] Pregunta: ${faq.pregunta}. Respuesta: ${faq.respuesta}`;
+            const text = `[FAQ - Ingeniería de Software] Pregunta: ${faq.pregunta}. Respuesta: ${faq.respuesta}`;
             const embedding = yield generateEmbedding(text);
             if (embedding.length > 0) {
                 database.run('INSERT INTO vectors (id, text, type, embedding, metadata) VALUES (?, ?, ?, ?, ?)', [faq.id, text, 'faq', JSON.stringify(embedding), JSON.stringify(faq)]);
             }
         }
-        // 9. Guardar hash
+        // 7. Guardar hash
         database.run("INSERT OR REPLACE INTO metadata (key, value) VALUES ('data_hash', ?)", [currentHash]);
-        // 10. Guardar BD
+        // 8. Guardar BD
         saveDatabase();
         const countResult = database.exec('SELECT COUNT(*) FROM vectors');
         const count = countResult.length > 0 ? countResult[0].values[0][0] : 0;
-        console.log(`✅ Base de datos vectorial sincronizada con ${count} registros.`);
+        console.log(`✅ Base de datos vectorial sincronizada con ${count} registros FAQ.`);
     }
     catch (error) {
         console.error('❌ Error sincronizando vector store:', error);
@@ -212,13 +201,9 @@ const searchContext = (query_1, ...args_1) => __awaiter(void 0, [query_1, ...arg
         // 4. Ordenar y tomar los más relevantes
         results.sort((a, b) => b.score - a.score);
         const topResults = results.slice(0, limit);
-        // 5. Formatear contexto según el tipo
+        // 5. Formatear contexto - Solo FAQs
         const contextParts = topResults.map((r) => {
-            if (r.type === 'faq') {
-                // Para FAQ, solo devolver la respuesta directa
-                return `[Pregunta Frecuente] ${r.metadata.respuesta}`;
-            }
-            return r.text;
+            return `[Pregunta Frecuente] ${r.metadata.respuesta}`;
         });
         return contextParts.join('\n\n');
     }
@@ -229,5 +214,5 @@ const searchContext = (query_1, ...args_1) => __awaiter(void 0, [query_1, ...arg
 });
 exports.searchContext = searchContext;
 // Inicializar al importar
-console.log('🚀 Vector service cargado. Sincronizando en segundo plano...');
+console.log('🚀 Vector service (PreSoft) cargado. Sincronizando en segundo plano...');
 (0, exports.syncVectorStore)().catch(err => console.error('Error en sincronización inicial:', err));
