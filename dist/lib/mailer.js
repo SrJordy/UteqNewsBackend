@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendPasswordResetEmail = exports.sendVerificationEmail = void 0;
+exports.sendAdminCredentialsEmail = exports.sendPasswordResetEmail = exports.sendVerificationEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -209,9 +209,80 @@ class GmailService {
             });
         });
     }
+    /**
+     * Enviar credenciales de admin al nuevo usuario
+     */
+    sendAdminCredentialsEmail(to, name, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Credenciales de Administrador - PreSoft</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 40px auto;">
+                <tr>
+                    <td>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%); padding: 35px; text-align: center;">
+                                    <h1 style="color: #ffffff; margin: 0; font-size: 28px;">PreSoft Admin</h1>
+                                    <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 14px;">Panel de Administración</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 35px;">
+                                    <p style="color: #333; font-size: 16px; line-height: 1.6;">¡Hola <strong>${name}</strong>!</p>
+                                    <p style="color: #555; font-size: 15px; line-height: 1.6;">
+                                        Tu cuenta de administrador ha sido creada. A continuación encontrarás tus credenciales de acceso:
+                                    </p>
+                                    
+                                    <table width="100%" style="background-color: #f8f9fa; border-radius: 12px; padding: 20px; margin: 25px 0;">
+                                        <tr>
+                                            <td style="padding: 15px;">
+                                                <p style="margin: 0 0 10px;"><strong>Email:</strong> ${to}</p>
+                                                <p style="margin: 0; font-size: 24px; font-family: monospace; color: #2E7D32;"><strong>Contraseña:</strong> ${password}</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <p style="color: #E53935; font-size: 14px; font-weight: bold;">
+                                        ⚠️ IMPORTANTE: Deberás cambiar tu contraseña en el primer inicio de sesión.
+                                    </p>
+                                    
+                                    <p style="color: #999; font-size: 13px; margin-top: 30px;">
+                                        Si no solicitaste esta cuenta, ignora este mensaje.
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                                    <p style="color: #999; font-size: 12px; margin: 0;">
+                                        © ${new Date().getFullYear()} PreSoft - UTEQ | Elaborado por: Jordy Vilcacundo C.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        `;
+            return this.sendEmail({
+                to,
+                subject: '🔐 Credenciales de Administrador - PreSoft',
+                html: htmlContent,
+                text: `Hola ${name}, tu contraseña de administrador es: ${password}. Deberás cambiarla en el primer inicio de sesión.`
+            });
+        });
+    }
 }
 // Exportar una instancia única (Singleton)
 const gmailService = new GmailService();
 exports.sendVerificationEmail = gmailService.sendVerificationEmail.bind(gmailService);
 exports.sendPasswordResetEmail = gmailService.sendPasswordResetEmail.bind(gmailService);
+exports.sendAdminCredentialsEmail = gmailService.sendAdminCredentialsEmail.bind(gmailService);
 exports.default = gmailService;

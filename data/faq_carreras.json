@@ -363,6 +363,13 @@
       "categoria": "Exclusividad",
       "pregunta": "¿Veré solo código durante la carrera? / ¿En la carrera todo será programación?",
       "respuesta": "El código es el corazón, pero no lo es todo. También aprenderás a hablar en público, a gestionar proyectos, a diseñar interfaces bonitas (UX/UI) y a entender el negocio. Formamos profesionales completos, no robots."
+    },
+    {
+      "id": "soft_mjfkthii_8wwx",
+      "carrera": "software",
+      "categoria": "Idioma",
+      "pregunta": "¿Cuantos idiomas se deben saber para estudiar software?",
+      "respuesta": "No es necesario estudiar idiomas, ya que la carrera de software en la UTEQ te forma de manera continua en ingles durante gran parte de la carrera "
     }
   ]
 }

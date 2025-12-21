@@ -1,36 +1,56 @@
 import Fastify from 'fastify';
-import cors from '@fastify/cors'; // Importar el plugin CORS
-import newsRoutes from './routes/news.routes';
-import videosRoutes from './routes/videos.routes';
-import magazineRoutes from './routes/magazine.routes';
-import facultyRoutes from './routes/faculty.routes';
-import careerRoutes from './routes/career.routes';
-import authRoutes from './routes/auth.routes';
-import aiRoutes from './routes/ai.routes';
+import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
+import fastifyMultipart from '@fastify/multipart';
+import fastifyCookie from '@fastify/cookie';
+import path from 'path';
+import newsRoutes from './routes/newsRoutes';
+import magazineRoutes from './routes/magazineRoutes';
+import facultyRoutes from './routes/facultyRoutes';
+import careerRoutes from './routes/careerRoutes';
+import authRoutes from './routes/authRoutes';
+import aiRoutes from './routes/aiRoutes';
+import adminRoutes from './routes/adminRoutes';
 
 const server = Fastify({ logger: true });
 
+// Registrar plugin de cookies (DEBE estar antes de CORS)
+server.register(fastifyCookie);
+
 // Registrar el plugin CORS
 server.register(cors, {
-  origin: ["*"],
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 });
 
+// Registrar multipart para uploads
+server.register(fastifyMultipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB max
+  }
+});
+
+// Servir archivos estáticos (uploads)
+server.register(fastifyStatic, {
+  root: path.join(__dirname, '../uploads'),
+  prefix: '/uploads/',
+});
+
 // Ruta principal para verificar el estado del servidor
 server.get('/', async (request, reply) => {
-  return { status: 'ok', message: 'Servidor UTEQNewsBackend funcionando' };
+  return { status: 'ok', message: 'PreSoft Backend funcionando' };
 });
 
 // Registrar las rutas de la API
 server.register(authRoutes, { prefix: '/api/auth' });
 server.register(newsRoutes, { prefix: '/api/news' });
-server.register(videosRoutes, { prefix: '/api/videos' });
 server.register(magazineRoutes, { prefix: '/api/magazines' });
 server.register(facultyRoutes, { prefix: '/api/faculties' });
 server.register(careerRoutes, { prefix: '/api/careers' });
 server.register(aiRoutes, { prefix: '/api/ai' });
+server.register(adminRoutes, { prefix: '/api/admin' });
 
 
 const start = async () => {

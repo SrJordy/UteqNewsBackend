@@ -10,34 +10,109 @@ datasource db {
 
 // Modelo para los usuarios de la aplicación
 model Usuario {
-  id         Int      @id @default(autoincrement())
-  nombre     String
-  apellido   String
-  email      String   @unique
-  password   String // Se guardará hasheada
-  rol        String?  // Ejemplo: 'estudiante', 'admin'
-  verificado Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  apellido    String
+  email       String   @unique
+  password    String
+  rol         String   @default("usuario") // usuario, admin, superadmin
+  verificado  Boolean  @default(false)
+  activo      Boolean  @default(true)
+  primerLogin Boolean  @default(false) // true si debe cambiar contraseña en primer login
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relaciones
   deviceTokens DeviceToken[]
   preferencias PreferenciaUsuarioCarrera[]
-  userCodes    UserCode[] // AÑADIDO: Relación con los códigos de verificación
+  userCodes    UserCode[]
+  
+  // Contenido creado por el usuario (admin)
+  noticias     Noticia[]
+  tiktoks      TikTok[]
+  revistas     Revista[]
+  actividades  ActividadUsuario[]
 }
 
-// Modelo para almacenar las carreras que vienen de la API externa.
-// Sirve para establecer las preferencias de los usuarios.
+// Modelo para las noticias (contenido local)
+model Noticia {
+  id                Int      @id @default(autoincrement())
+  titulo            String
+  contenido         String
+  imagenPath        String?  // Ruta de imagen de portada
+  imagenesEvidencia String?  // JSON array con rutas de imágenes de evidencia
+  urlExterna        String?  // URL externa opcional
+  categoria         String   @default("General")
+  destacada         Boolean  @default(false)
+  createdBy         Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  autor             Usuario  @relation(fields: [createdBy], references: [id])
+  
+  @@index([createdBy])
+  @@index([categoria])
+}
+
+// Modelo para TikToks (solo URLs)
+model TikTok {
+  id           Int      @id @default(autoincrement())
+  titulo       String
+  descripcion  String?
+  tiktokUrl    String   // URL del TikTok
+  portadaPath  String?  // Ruta local de la portada/thumbnail
+  createdBy    Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  autor        Usuario  @relation(fields: [createdBy], references: [id])
+  
+  @@index([createdBy])
+}
+
+// Modelo para Revistas
+model Revista {
+  id           Int      @id @default(autoincrement())
+  titulo       String
+  anio         Int
+  mes          String
+  portadaPath  String   // Ruta local de la portada
+  pdfPath      String   // Ruta local del PDF
+  createdBy    Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  autor        Usuario  @relation(fields: [createdBy], references: [id])
+  
+  @@index([createdBy])
+  @@index([anio])
+}
+
+// Modelo para registro de actividad de usuarios
+model ActividadUsuario {
+  id          Int      @id @default(autoincrement())
+  usuarioId   Int
+  accion      String   // login, logout, crear_noticia, editar_noticia, etc.
+  detalles    String?  // Detalles adicionales en JSON
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
+  
+  @@index([usuarioId])
+  @@index([accion])
+}
+
+// Modelo para almacenar las carreras que vienen de la API externa
 model Carrera {
-  id    Int    @id @default(autoincrement()) // ID interno de nuestra BD
-  apiId String @unique // CAMBIADO: Ahora es String para guardar crNombre
+  id    Int    @id @default(autoincrement())
+  apiId String @unique
   nombre String
 
-  // Relaciones
   usuariosConPreferencia PreferenciaUsuarioCarrera[]
 }
 
-// Tabla intermedia para la relación muchos-a-muchos de las preferencias
+// Tabla intermedia para preferencias
 model PreferenciaUsuarioCarrera {
   usuario   Usuario @relation(fields: [usuarioId], references: [id])
   usuarioId Int
@@ -49,7 +124,7 @@ model PreferenciaUsuarioCarrera {
   @@index([carreraId])
 }
 
-// Modelo para los tokens de los dispositivos para notificaciones push
+// Modelo para los tokens de dispositivos
 model DeviceToken {
   id        Int      @id @default(autoincrement())
   token     String   @unique
@@ -61,12 +136,12 @@ model DeviceToken {
   @@index([usuarioId])
 }
 
-// AÑADIDO: Modelo para los códigos de verificación de usuario
+// Modelo para los códigos de verificación
 model UserCode {
   id         Int      @id @default(autoincrement())
   userId     Int
   code       String
-  status     String   @default("active") // active, used, expired
+  status     String   @default("active")
   expiryTime DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
