@@ -11,6 +11,7 @@ import careerRoutes from './routes/careerRoutes';
 import authRoutes from './routes/authRoutes';
 import aiRoutes from './routes/aiRoutes';
 import adminRoutes from './routes/adminRoutes';
+import mobileRoutes from './routes/mobileRoutes';
 
 const server = Fastify({ logger: true });
 
@@ -19,7 +20,7 @@ server.register(fastifyCookie);
 
 // Registrar el plugin CORS
 server.register(cors, {
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+  origin: true, // Permitir cualquier origen para la app móvil
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -51,6 +52,7 @@ server.register(facultyRoutes, { prefix: '/api/faculties' });
 server.register(careerRoutes, { prefix: '/api/careers' });
 server.register(aiRoutes, { prefix: '/api/ai' });
 server.register(adminRoutes, { prefix: '/api/admin' });
+server.register(mobileRoutes, { prefix: '/api/mobile' }); // Rutas públicas para app móvil
 
 
 const start = async () => {

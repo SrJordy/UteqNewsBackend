@@ -25,12 +25,13 @@ const careerRoutes_1 = __importDefault(require("./routes/careerRoutes"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const aiRoutes_1 = __importDefault(require("./routes/aiRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
+const mobileRoutes_1 = __importDefault(require("./routes/mobileRoutes"));
 const server = (0, fastify_1.default)({ logger: true });
 // Registrar plugin de cookies (DEBE estar antes de CORS)
 server.register(cookie_1.default);
 // Registrar el plugin CORS
 server.register(cors_1.default, {
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: true, // Permitir cualquier origen para la app móvil
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -58,6 +59,7 @@ server.register(facultyRoutes_1.default, { prefix: '/api/faculties' });
 server.register(careerRoutes_1.default, { prefix: '/api/careers' });
 server.register(aiRoutes_1.default, { prefix: '/api/ai' });
 server.register(adminRoutes_1.default, { prefix: '/api/admin' });
+server.register(mobileRoutes_1.default, { prefix: '/api/mobile' }); // Rutas públicas para app móvil
 const start = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield server.listen({ port: 3000, host: '0.0.0.0' });
