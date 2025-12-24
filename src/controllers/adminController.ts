@@ -129,18 +129,35 @@ export const deleteNoticiaHandler = async (
     try {
         const id = parseInt(request.params.id);
 
-        // Obtener noticia para borrar imagen si existe
+        // Obtener noticia para borrar imagen y evidencias si existen
         const noticia = await prisma.noticia.findUnique({ where: { id } });
 
         if (!noticia) {
             return reply.code(404).send({ error: 'Noticia no encontrada' });
         }
 
-        // Borrar imagen si existe
+        // Borrar imagen de portada si existe
         if (noticia.imagenPath) {
             const imagePath = path.join(__dirname, '../../uploads', noticia.imagenPath);
             if (fs.existsSync(imagePath)) {
                 fs.unlinkSync(imagePath);
+                console.log(`📷 Imagen de portada eliminada: ${noticia.imagenPath}`);
+            }
+        }
+
+        // Borrar imágenes de evidencias si existen
+        if (noticia.imagenesEvidencia) {
+            try {
+                const evidencias = JSON.parse(noticia.imagenesEvidencia) as string[];
+                for (const evidenciaPath of evidencias) {
+                    const evidenciaFullPath = path.join(__dirname, '../../uploads', evidenciaPath);
+                    if (fs.existsSync(evidenciaFullPath)) {
+                        fs.unlinkSync(evidenciaFullPath);
+                        console.log(`🗑️ Evidencia eliminada: ${evidenciaPath}`);
+                    }
+                }
+            } catch (parseError) {
+                console.error('Error al parsear evidencias:', parseError);
             }
         }
 
