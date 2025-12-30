@@ -4,28 +4,26 @@ import { RegisterUserInput, LoginUserInput, UpdateUserInput, PreferenceInput, Re
 import { generateTokenPair, getCookieOptions, ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME, verifyToken } from '../services/jwtService';
 import { prisma } from '../lib/prisma';
 import * as bcrypt from 'bcryptjs';
+import { validateInput, registerSchema, loginSchema, verifyEmailSchema } from '../lib/validation';
 
 export const registerHandler = async (
     request: FastifyRequest<{ Body: RegisterUserInput }>,
     reply: FastifyReply
 ) => {
     try {
-        console.log('Register request received:', JSON.stringify(request.body));
-        const user = await registerUser(request.body);
-        console.log('User registered successfully:', user.email);
-        return reply.code(201).send(user); // 201 Created
+        // Validar input
+        const validatedData = validateInput(registerSchema, request.body);
+        const user = await registerUser(validatedData as RegisterUserInput);
+        return reply.code(201).send(user);
     } catch (error: any) {
-        console.error('Registration error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name,
-            code: error.code
-        });
         // Si el error es porque el email ya existe
         if (error.message && error.message.includes('registrado')) {
-            return reply.code(409).send({ error: error.message }); // 409 Conflict
+            return reply.code(409).send({ error: error.message });
         }
-        console.error('Controller Error: Fallo en el registro de usuario.', error);
+        // Error de validación
+        if (error.message && !error.message.includes('servidor')) {
+            return reply.code(400).send({ error: error.message });
+        }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al registrar el usuario.' });
     }
 };
@@ -35,14 +33,12 @@ export const verifyEmailHandler = async (
     reply: FastifyReply
 ) => {
     try {
-        const { email, code } = request.body;
-        const result = await verifyEmail(email, code);
+        const validatedData = validateInput(verifyEmailSchema, request.body);
+        const result = await verifyEmail(validatedData.email, validatedData.code);
         return reply.code(200).send(result);
     } catch (error: any) {
-        console.error('Controller Error: Fallo en la verificación de correo.', error);
-        // Errores específicos para el usuario
-        if (error.message.includes('Usuario no encontrado') || error.message.includes('Código de verificación inválido o expirado')) {
-            return reply.code(400).send({ error: error.message }); // 400 Bad Request
+        if (error.message.includes('Usuario no encontrado') || error.message.includes('Código de verificación inválido')) {
+            return reply.code(400).send({ error: error.message });
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al verificar el correo.' });
     }
@@ -54,13 +50,12 @@ export const loginHandler = async (
     reply: FastifyReply
 ) => {
     try {
-        const user = await loginUser(request.body);
+        const validatedData = validateInput(loginSchema, request.body);
+        const user = await loginUser(validatedData as LoginUserInput);
         return reply.code(200).send(user);
     } catch (error: any) {
-        console.error('Controller Error: Fallo en el inicio de sesión.', error);
-        // Errores específicos para el usuario
         if (error.message.includes('Credenciales inválidas') || error.message.includes('verifica tu correo')) {
-            return reply.code(401).send({ error: error.message }); // 401 Unauthorized
+            return reply.code(401).send({ error: error.message });
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al iniciar sesión.' });
     }

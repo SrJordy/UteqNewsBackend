@@ -58,40 +58,36 @@ const authService_1 = require("../services/authService");
 const jwtService_1 = require("../services/jwtService");
 const prisma_1 = require("../lib/prisma");
 const bcrypt = __importStar(require("bcryptjs"));
+const validation_1 = require("../lib/validation");
 const registerHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('Register request received:', JSON.stringify(request.body));
-        const user = yield (0, authService_1.registerUser)(request.body);
-        console.log('User registered successfully:', user.email);
-        return reply.code(201).send(user); // 201 Created
+        // Validar input
+        const validatedData = (0, validation_1.validateInput)(validation_1.registerSchema, request.body);
+        const user = yield (0, authService_1.registerUser)(validatedData);
+        return reply.code(201).send(user);
     }
     catch (error) {
-        console.error('Registration error details:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name,
-            code: error.code
-        });
         // Si el error es porque el email ya existe
         if (error.message && error.message.includes('registrado')) {
-            return reply.code(409).send({ error: error.message }); // 409 Conflict
+            return reply.code(409).send({ error: error.message });
         }
-        console.error('Controller Error: Fallo en el registro de usuario.', error);
+        // Error de validación
+        if (error.message && !error.message.includes('servidor')) {
+            return reply.code(400).send({ error: error.message });
+        }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al registrar el usuario.' });
     }
 });
 exports.registerHandler = registerHandler;
 const verifyEmailHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, code } = request.body;
-        const result = yield (0, authService_1.verifyEmail)(email, code);
+        const validatedData = (0, validation_1.validateInput)(validation_1.verifyEmailSchema, request.body);
+        const result = yield (0, authService_1.verifyEmail)(validatedData.email, validatedData.code);
         return reply.code(200).send(result);
     }
     catch (error) {
-        console.error('Controller Error: Fallo en la verificación de correo.', error);
-        // Errores específicos para el usuario
-        if (error.message.includes('Usuario no encontrado') || error.message.includes('Código de verificación inválido o expirado')) {
-            return reply.code(400).send({ error: error.message }); // 400 Bad Request
+        if (error.message.includes('Usuario no encontrado') || error.message.includes('Código de verificación inválido')) {
+            return reply.code(400).send({ error: error.message });
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al verificar el correo.' });
     }
@@ -100,14 +96,13 @@ exports.verifyEmailHandler = verifyEmailHandler;
 // Login para app móvil (sin JWT, devuelve solo datos)
 const loginHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield (0, authService_1.loginUser)(request.body);
+        const validatedData = (0, validation_1.validateInput)(validation_1.loginSchema, request.body);
+        const user = yield (0, authService_1.loginUser)(validatedData);
         return reply.code(200).send(user);
     }
     catch (error) {
-        console.error('Controller Error: Fallo en el inicio de sesión.', error);
-        // Errores específicos para el usuario
         if (error.message.includes('Credenciales inválidas') || error.message.includes('verifica tu correo')) {
-            return reply.code(401).send({ error: error.message }); // 401 Unauthorized
+            return reply.code(401).send({ error: error.message });
         }
         return reply.code(500).send({ error: 'Ocurrió un error en el servidor al iniciar sesión.' });
     }

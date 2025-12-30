@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
 const cors_1 = __importDefault(require("@fastify/cors"));
+const rate_limit_1 = __importDefault(require("@fastify/rate-limit"));
 const static_1 = __importDefault(require("@fastify/static"));
 const multipart_1 = __importDefault(require("@fastify/multipart"));
 const cookie_1 = __importDefault(require("@fastify/cookie"));
@@ -32,9 +33,19 @@ server.register(cookie_1.default);
 // Registrar el plugin CORS
 server.register(cors_1.default, {
     origin: true, // Permitir cualquier origen para la app móvil
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+});
+// Rate Limiting - Protección contra spam y ataques de fuerza bruta
+server.register(rate_limit_1.default, {
+    max: 100, // Máximo 100 peticiones
+    timeWindow: '1 minute', // Por minuto
+    errorResponseBuilder: () => ({
+        statusCode: 429,
+        error: 'Demasiadas peticiones',
+        message: 'Has superado el límite de peticiones. Intenta de nuevo en un minuto.'
+    })
 });
 // Registrar multipart para uploads
 server.register(multipart_1.default, {

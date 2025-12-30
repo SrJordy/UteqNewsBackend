@@ -5,6 +5,7 @@ import fs from 'fs';
 import * as bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendAdminCredentialsEmail } from '../lib/mailer';
+import { compressImage } from '../lib/imageCompressor';
 
 const prisma = new PrismaClient();
 
@@ -618,13 +619,20 @@ export const uploadNoticiaImagenHandler = async (
             fs.mkdirSync(uploadDir, { recursive: true });
         }
 
-        // Guardar archivo
-        const ext = path.extname(data.filename);
+        // Guardar archivo con compresión
+        const ext = path.extname(data.filename).toLowerCase();
         const fileName = `noticia_${id}_${Date.now()}${ext}`;
         const filePath = path.join(uploadDir, fileName);
 
         const buffer = await data.toBuffer();
-        fs.writeFileSync(filePath, buffer);
+
+        // Comprimir imagen antes de guardar
+        const isImage = ['.jpg', '.jpeg', '.png', '.webp'].includes(ext);
+        if (isImage) {
+            await compressImage(buffer, filePath, { quality: 85, maxWidth: 1200 });
+        } else {
+            fs.writeFileSync(filePath, buffer);
+        }
 
         // Borrar imagen anterior si existe
         if (noticia.imagenPath) {
@@ -638,9 +646,8 @@ export const uploadNoticiaImagenHandler = async (
             data: { imagenPath: `noticias/${fileName}` }
         });
 
-        return reply.code(200).send({ message: 'Imagen subida correctamente', path: `noticias/${fileName}` });
+        return reply.code(200).send({ message: 'Imagen subida y optimizada', path: `noticias/${fileName}` });
     } catch (error) {
-        console.error('Error al subir imagen:', error);
         return reply.code(500).send({ error: 'Error al subir imagen' });
     }
 };

@@ -59,6 +59,7 @@ const fs_1 = __importDefault(require("fs"));
 const bcrypt = __importStar(require("bcryptjs"));
 const crypto_1 = __importDefault(require("crypto"));
 const mailer_1 = require("../lib/mailer");
+const imageCompressor_1 = require("../lib/imageCompressor");
 const prisma = new client_1.PrismaClient();
 // GET /api/admin/noticias - Listar con paginación y búsqueda
 const getNoticiasHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
@@ -546,12 +547,19 @@ const uploadNoticiaImagenHandler = (request, reply) => __awaiter(void 0, void 0,
         if (!fs_1.default.existsSync(uploadDir)) {
             fs_1.default.mkdirSync(uploadDir, { recursive: true });
         }
-        // Guardar archivo
-        const ext = path_1.default.extname(data.filename);
+        // Guardar archivo con compresión
+        const ext = path_1.default.extname(data.filename).toLowerCase();
         const fileName = `noticia_${id}_${Date.now()}${ext}`;
         const filePath = path_1.default.join(uploadDir, fileName);
         const buffer = yield data.toBuffer();
-        fs_1.default.writeFileSync(filePath, buffer);
+        // Comprimir imagen antes de guardar
+        const isImage = ['.jpg', '.jpeg', '.png', '.webp'].includes(ext);
+        if (isImage) {
+            yield (0, imageCompressor_1.compressImage)(buffer, filePath, { quality: 85, maxWidth: 1200 });
+        }
+        else {
+            fs_1.default.writeFileSync(filePath, buffer);
+        }
         // Borrar imagen anterior si existe
         if (noticia.imagenPath) {
             const oldPath = path_1.default.join(__dirname, '../../uploads', noticia.imagenPath);
@@ -563,10 +571,9 @@ const uploadNoticiaImagenHandler = (request, reply) => __awaiter(void 0, void 0,
             where: { id },
             data: { imagenPath: `noticias/${fileName}` }
         });
-        return reply.code(200).send({ message: 'Imagen subida correctamente', path: `noticias/${fileName}` });
+        return reply.code(200).send({ message: 'Imagen subida y optimizada', path: `noticias/${fileName}` });
     }
     catch (error) {
-        console.error('Error al subir imagen:', error);
         return reply.code(500).send({ error: 'Error al subir imagen' });
     }
 });
