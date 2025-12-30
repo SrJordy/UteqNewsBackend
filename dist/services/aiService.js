@@ -12,23 +12,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.askAI = void 0;
-const axios_1 = __importDefault(require("axios"));
+exports.testGroqModels = exports.askAI = void 0;
+const groq_sdk_1 = __importDefault(require("groq-sdk"));
 const vectorService_1 = require("./vectorService");
-// Configuración de OpenRouter
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || process.env.GOOGLE_API_KEY;
-const SITE_URL = 'https://uteq.edu.ec';
-const APP_NAME = 'PreSoft - Carrera de Software UTEQ';
-if (!OPENROUTER_API_KEY) {
-    console.warn('⚠️ OPENROUTER_API_KEY no está definida. El chat de IA no funcionará correctamente.');
+// Configuración de Groq
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+// Modelos gratuitos disponibles en Groq (ordenados por capacidad)
+const GROQ_MODELS = {
+    // Modelos más capaces
+    LLAMA_70B: 'llama-3.3-70b-versatile', // Muy potente, más lento
+    LLAMA_8B: 'llama-3.1-8b-instant', // Rápido y bueno
+    GEMMA_9B: 'gemma2-9b-it', // Google Gemma 2
+    MIXTRAL: 'mixtral-8x7b-32768', // Mixtral de Mistral
+};
+// Modelo por defecto para el chatbot
+const DEFAULT_MODEL = GROQ_MODELS.LLAMA_70B;
+if (!GROQ_API_KEY) {
+    console.warn('⚠️ GROQ_API_KEY no está definida. El chat de IA no funcionará correctamente.');
 }
+// Inicializar cliente de Groq
+const groq = new groq_sdk_1.default({
+    apiKey: GROQ_API_KEY,
+});
 /**
  * Pregunta a la IA usando RAG (Búsqueda Vectorial) para el contexto.
  * @param question - La pregunta del usuario.
  * @returns La respuesta de la IA.
  */
 const askAI = (question) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c;
     let context = '';
     try {
         // 1. Obtener contexto relevante usando búsqueda vectorial
@@ -41,49 +53,96 @@ const askAI = (question) => __awaiter(void 0, void 0, void 0, function* () {
         context = 'No se pudo obtener información detallada en este momento.';
     }
     try {
-        const prompt = `Eres un asistente de la Universidad Técnica Estatal de Quevedo (UTEQ).
+        const systemPrompt = `Eres el asistente virtual de la carrera de Ingeniería en Software de la UTEQ (Universidad Técnica Estatal de Quevedo).
+
+PERSONALIDAD:
+- Eres amigable, cercano y hablas de tú a tú con los estudiantes
+- Usas un tono casual pero profesional
+- Puedes usar emojis ocasionalmente para hacer la conversación más amena
 
 INSTRUCCIONES:
-1. Responde DIRECTAMENTE a la pregunta del usuario basándote en el CONTEXTO proporcionado.
-2. Tu respuesta debe ser en ESPAÑOL.
-3. Encierra tu respuesta final dentro de las etiquetas <respuesta> y </respuesta>.
-4. Si no encuentras información relevante en el contexto, indica que no tienes esa información.
+1. Responde DIRECTAMENTE a la pregunta del usuario basándote en el CONTEXTO proporcionado
+2. Tu respuesta debe ser en ESPAÑOL
+3. Si no encuentras información en el contexto pero es una pregunta general sobre la carrera o la universidad, responde con tu conocimiento general
+4. Si la pregunta no tiene relación con la UTEQ, la carrera de software o temas académicos, amablemente indica que estás especializado en esos temas
+5. Sé conciso pero útil - no te extiendas innecesariamente
 
 CONTEXTO (RAG):
-${context || 'No hay contexto disponible.'}
-
-PREGUNTA DEL USUARIO: ${question}`;
-        console.log(`🤖 Consultando a OpenRouter...`);
-        const response = yield axios_1.default.post('https://openrouter.ai/api/v1/chat/completions', {
-            model: 'tngtech/deepseek-r1t-chimera:free',
-            messages: [{ role: 'user', content: prompt }]
-        }, {
-            headers: {
-                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                'HTTP-Referer': SITE_URL,
-                'X-Title': APP_NAME,
-                'Content-Type': 'application/json'
-            }
+${context || 'No hay contexto específico disponible.'}`;
+        console.log(`🤖 Consultando a Groq (${DEFAULT_MODEL})...`);
+        const startTime = Date.now();
+        const response = yield groq.chat.completions.create({
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: question }
+            ],
+            model: DEFAULT_MODEL,
+            temperature: 0.7,
+            max_tokens: 1024,
         });
-        let text = (_d = (_c = (_b = (_a = response.data) === null || _a === void 0 ? void 0 : _a.choices) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.message) === null || _d === void 0 ? void 0 : _d.content;
+        const endTime = Date.now();
+        console.log(`⚡ Respuesta recibida en ${endTime - startTime}ms`);
+        const text = (_c = (_b = (_a = response.choices) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message) === null || _c === void 0 ? void 0 : _c.content;
         if (text) {
-            // Extraer contenido de <respuesta>
-            const match = text.match(/<respuesta>([\s\S]*?)<\/respuesta>/i);
-            if (match && match[1]) {
-                return match[1].trim();
-            }
-            // Fallback: limpiar tags <think>
-            text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-            return text;
+            return text.trim();
         }
     }
     catch (error) {
-        console.error(`❌ Fallo con OpenRouter:`, ((_e = error.response) === null || _e === void 0 ? void 0 : _e.data) || error.message);
-        if (((_f = error.response) === null || _f === void 0 ? void 0 : _f.status) === 401) {
-            return 'Error de autenticación: Verifica tu OPENROUTER_API_KEY.';
+        console.error(`❌ Error con Groq:`, error.message);
+        if (error.status === 401) {
+            return 'Error de autenticación: Verifica tu GROQ_API_KEY.';
         }
-        return 'Lo siento, no pude conectar con el servicio de inteligencia. Por favor intenta más tarde.';
+        if (error.status === 429) {
+            return 'Estoy un poco ocupado ahora mismo. ¿Puedes intentar de nuevo en unos segundos? 😅';
+        }
+        return 'Lo siento, tuve un problema técnico. ¿Puedes intentar de nuevo? 🔧';
     }
-    return 'No se pudo generar una respuesta.';
+    return 'No pude generar una respuesta. ¿Puedes reformular tu pregunta?';
 });
 exports.askAI = askAI;
+/**
+ * Función de prueba para comparar modelos de Groq
+ */
+const testGroqModels = (...args_1) => __awaiter(void 0, [...args_1], void 0, function* (testQuestion = '¿Cuál es la malla curricular de Ingeniería en Software?') {
+    var _a, _b, _c;
+    console.log('\n🧪 === PRUEBA DE MODELOS GROQ ===\n');
+    console.log(`📝 Pregunta de prueba: "${testQuestion}"\n`);
+    const models = [
+        { name: 'LLaMA 3.3 70B', id: GROQ_MODELS.LLAMA_70B },
+        { name: 'LLaMA 3.1 8B', id: GROQ_MODELS.LLAMA_8B },
+        { name: 'Gemma 2 9B', id: GROQ_MODELS.GEMMA_9B },
+        { name: 'Mixtral 8x7B', id: GROQ_MODELS.MIXTRAL },
+    ];
+    for (const model of models) {
+        console.log(`\n📊 Probando: ${model.name} (${model.id})`);
+        console.log('-'.repeat(50));
+        try {
+            const startTime = Date.now();
+            const response = yield groq.chat.completions.create({
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'Eres un asistente de la carrera de Ingeniería en Software de la UTEQ. Responde de forma concisa en español.'
+                    },
+                    { role: 'user', content: testQuestion }
+                ],
+                model: model.id,
+                temperature: 0.7,
+                max_tokens: 512,
+            });
+            const endTime = Date.now();
+            const responseTime = endTime - startTime;
+            const text = (_c = (_b = (_a = response.choices) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message) === null || _c === void 0 ? void 0 : _c.content;
+            const tokens = response.usage;
+            console.log(`⏱️  Tiempo: ${responseTime}ms`);
+            console.log(`📊 Tokens: ${tokens === null || tokens === void 0 ? void 0 : tokens.prompt_tokens} entrada, ${tokens === null || tokens === void 0 ? void 0 : tokens.completion_tokens} salida`);
+            console.log(`💬 Respuesta (primeros 200 chars):`);
+            console.log(`   "${text === null || text === void 0 ? void 0 : text.substring(0, 200)}..."`);
+        }
+        catch (error) {
+            console.log(`❌ Error: ${error.message}`);
+        }
+    }
+    console.log('\n🏁 === FIN DE PRUEBAS ===\n');
+});
+exports.testGroqModels = testGroqModels;

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.askAIHandler = void 0;
+exports.testGroqHandler = exports.askAIHandler = void 0;
 const aiService_1 = require("../services/aiService");
 const askAIHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -26,3 +26,21 @@ const askAIHandler = (request, reply) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.askAIHandler = askAIHandler;
+// Handler para probar los modelos de Groq
+const testGroqHandler = (request, reply) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const question = ((_a = request.body) === null || _a === void 0 ? void 0 : _a.question) || '¿Cuál es la malla curricular de Ingeniería en Software?';
+        // Ejecutar prueba en background (no bloquea la respuesta)
+        (0, aiService_1.testGroqModels)(question);
+        return reply.code(200).send({
+            message: 'Prueba de modelos iniciada. Revisa los logs del servidor para ver los resultados.',
+            question: question
+        });
+    }
+    catch (error) {
+        console.error('Error al iniciar prueba:', error);
+        return reply.code(500).send({ error: 'Error al iniciar prueba de modelos' });
+    }
+});
+exports.testGroqHandler = testGroqHandler;

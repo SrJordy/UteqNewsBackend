@@ -16,5 +16,6 @@ const aiController_1 = require("../controllers/aiController");
  */
 const aiRoutes = (server) => __awaiter(void 0, void 0, void 0, function* () {
     server.post('/ask', aiController_1.askAIHandler);
+    server.post('/test-models', aiController_1.testGroqHandler); // Ruta para probar modelos de Groq
 });
 exports.default = aiRoutes;
