@@ -14,6 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
 const cors_1 = __importDefault(require("@fastify/cors"));
+const helmet_1 = __importDefault(require("@fastify/helmet"));
+const compress_1 = __importDefault(require("@fastify/compress"));
 const rate_limit_1 = __importDefault(require("@fastify/rate-limit"));
 const static_1 = __importDefault(require("@fastify/static"));
 const multipart_1 = __importDefault(require("@fastify/multipart"));
@@ -28,26 +30,41 @@ const aiRoutes_1 = __importDefault(require("./routes/aiRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const mobileRoutes_1 = __importDefault(require("./routes/mobileRoutes"));
 const server = (0, fastify_1.default)({ logger: true });
-// Registrar plugin de cookies (DEBE estar antes de CORS)
+// === SEGURIDAD ===
+// Registrar plugin de cookies
 server.register(cookie_1.default);
-// Registrar el plugin CORS
+// Helmet - Headers de seguridad HTTP (configurado para permitir recursos)
+server.register(helmet_1.default, {
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Permitir recursos cross-origin
+    crossOriginOpenerPolicy: false,
+});
+// CORS - Permitir peticiones cross-origin
 server.register(cors_1.default, {
-    origin: true, // Permitir cualquier origen para la app móvil
+    origin: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
 });
-// Rate Limiting - Protección contra spam y ataques de fuerza bruta
+// === RENDIMIENTO ===
+// Compresión Brotli/Gzip para respuestas
+server.register(compress_1.default, {
+    global: true,
+    encodings: ['br', 'gzip', 'deflate'],
+});
+// Rate Limiting - Protección contra spam y fuerza bruta
 server.register(rate_limit_1.default, {
-    max: 100, // Máximo 100 peticiones
-    timeWindow: '1 minute', // Por minuto
+    max: 100,
+    timeWindow: '1 minute',
     errorResponseBuilder: () => ({
         statusCode: 429,
         error: 'Demasiadas peticiones',
         message: 'Has superado el límite de peticiones. Intenta de nuevo en un minuto.'
     })
 });
-// Registrar multipart para uploads
+// === UPLOADS ===
+// Multipart para archivos
 server.register(multipart_1.default, {
     limits: {
         fileSize: 10 * 1024 * 1024 // 10MB max

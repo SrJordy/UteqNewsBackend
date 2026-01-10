@@ -1,5 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import compress from '@fastify/compress';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import fastifyMultipart from '@fastify/multipart';
@@ -16,21 +18,39 @@ import mobileRoutes from './routes/mobileRoutes';
 
 const server = Fastify({ logger: true });
 
-// Registrar plugin de cookies (DEBE estar antes de CORS)
+// === SEGURIDAD ===
+
+// Registrar plugin de cookies
 server.register(fastifyCookie);
 
-// Registrar el plugin CORS
+// Helmet - Headers de seguridad HTTP (configurado para permitir recursos)
+server.register(helmet, {
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Permitir recursos cross-origin
+  crossOriginOpenerPolicy: false,
+});
+
+// CORS - Permitir peticiones cross-origin
 server.register(cors, {
-  origin: true, // Permitir cualquier origen para la app móvil
+  origin: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 });
 
-// Rate Limiting - Protección contra spam y ataques de fuerza bruta
+// === RENDIMIENTO ===
+
+// Compresión Brotli/Gzip para respuestas
+server.register(compress, {
+  global: true,
+  encodings: ['br', 'gzip', 'deflate'],
+});
+
+// Rate Limiting - Protección contra spam y fuerza bruta
 server.register(rateLimit, {
-  max: 100, // Máximo 100 peticiones
-  timeWindow: '1 minute', // Por minuto
+  max: 100,
+  timeWindow: '1 minute',
   errorResponseBuilder: () => ({
     statusCode: 429,
     error: 'Demasiadas peticiones',
@@ -38,7 +58,9 @@ server.register(rateLimit, {
   })
 });
 
-// Registrar multipart para uploads
+// === UPLOADS ===
+
+// Multipart para archivos
 server.register(fastifyMultipart, {
   limits: {
     fileSize: 10 * 1024 * 1024 // 10MB max
