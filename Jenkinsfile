@@ -30,5 +30,16 @@ pipeline {
                 }
             }
         }
+        stage('Debug Logs'){
+            steps{
+                script{
+                   echo "⏳ Esperando 10 segundos..."
+                   sleep 10
+                   echo "📋 === LOGS DEL ARRANQUE (MIGRACIONES) ==="
+                   sh 'docker logs uteqnews_backend'
+                   echo "📋 ========================================"
+                }
+            }
+        }
     }
 }
