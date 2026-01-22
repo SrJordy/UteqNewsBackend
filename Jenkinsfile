@@ -27,13 +27,6 @@ pipeline {
                     sh 'docker rm nginx_ssl_uteqnews || true'
                     sh 'docker compose build'
                     sh 'docker compose up -d --force-recreate'
-                    
-                    // Esperar unos segundos a que levante
-                    sleep 10
-                    
-                    // Ejecutar migraciones y seed
-                    sh 'docker exec uteqnews_backend pnpm prisma migrate deploy'
-                    sh 'docker exec uteqnews_backend pnpm prisma db seed'
                 }
             }
         }

@@ -14,10 +14,13 @@ RUN pnpm prisma generate && pnpm run build
 COPY uploads ./uploads
 COPY data ./data
 COPY .env ./
+COPY start.sh ./
+RUN chmod +x start.sh
+
 # Exponer puerto del backend
 EXPOSE 3000
-# Iniciar el servidor
-ENTRYPOINT ["node", "dist/index.js"]
+# Iniciar con el script de arranque
+ENTRYPOINT ["./start.sh"]
 
 FROM nginx:latest AS nginx_conf
 WORKDIR /home/app

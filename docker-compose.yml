@@ -22,7 +22,7 @@ services:
       target: nginx_conf
     tty: true
     ports:
-      - "9125:443"
+      - "9066:443"
     volumes:
       #- nginxfiles:/ssl/
       #- /home/app/nginx/html:/var/www/html
