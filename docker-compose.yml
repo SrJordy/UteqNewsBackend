@@ -1,0 +1,50 @@
+#se puede cambiar todo el service probar con cualuier puerto
+services:
+  uteqnews_backend:
+    container_name: uteqnews_backend
+    image: uteqnews_backend:1.0
+    build:
+      context: .
+      target: backend
+    ports:
+      - "9044:3000"
+    restart: always
+    networks:
+      - apptestjava
+  nginx_ssl_java_apptest:
+    container_name: nginx_ssl_java_apptest
+    image: nginx
+    build:
+      context: .
+      target: nginx_conf
+    tty: true
+    ports:
+      - "9124:443"
+    volumes:
+      #- nginxfiles:/ssl/
+      #- /home/app/nginx/html:/var/www/html
+      #- /home/app/nginx/logs:/etc/nginx/logs
+      - nginxfiles:/home/app/nginx
+    #command: tail -f /dev/null
+    command: > 
+      bash -c "
+        mkdir -p /var/www/html /etc/nginx/logs /ssl &&
+        cp -r /home/app/nginx/html/. /var/www/html/ &&
+        cp -r /home/app/nginx/logs/. /etc/nginx/logs/ &&
+        cp -r /home/app/nginx/ssl/. /ssl/ && 
+        nginx -g 'daemon off;'
+      "
+    restart: always
+    depends_on:
+      - uteqnews_backend
+    networks:
+      - apptestjava
+
+volumes:
+  nginxfiles:
+    external: true
+
+#el network se puede cambiar
+networks:
+  apptestjava:
+    driver: bridge
