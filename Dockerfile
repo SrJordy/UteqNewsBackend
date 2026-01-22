@@ -19,10 +19,6 @@ COPY uploads ./uploads
 COPY data ./data
 COPY .env ./
 
-# Ejecutar migraciones y seed durante el build (cargando .env manualmente)
-RUN export $(cat .env | grep -v '^#' | xargs) && npx prisma migrate deploy
-RUN export $(cat .env | grep -v '^#' | xargs) && npx prisma db seed
-
 # Exponer puerto del backend
 EXPOSE 3000
 
