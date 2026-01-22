@@ -3,13 +3,18 @@ set -e
 
 echo "🚀 Iniciando contenedor..."
 
+# Generar cliente Prisma (IMPORTANTE: para asegurar compatibilidad)
+echo "🔄 Generando cliente Prisma..."
+npx prisma generate
+
 # Ejecutar migraciones
 echo "📦 Ejecutando migraciones de base de datos..."
-node dist/index.js --migrate-only || pnpm prisma migrate deploy
+# Intenta migrar, si falla no detiene el contenedor inmediatamente pero muestra error
+npx prisma migrate deploy || echo "⚠️ Fallo en migraciones, intentando continuar..."
 
 # Ejecutar seed
 echo "🌱 Ejecutando seed..."
-pnpm prisma db seed
+npx prisma db seed || echo "⚠️ Fallo en seed, intentando continuar..."
 
 # Iniciar la aplicación
 echo "🔥 Iniciando servidor..."
