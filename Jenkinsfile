@@ -23,6 +23,8 @@ pipeline {
                 script{
                     sh 'docker stop uteqnews_backend || true'
                     sh 'docker rm uteqnews_backend || true'
+                    sh 'docker stop nginx_ssl_uteqnews || true'
+                    sh 'docker rm nginx_ssl_uteqnews || true'
                     sh 'docker compose build'
                     sh 'docker compose up -d --force-recreate'
                     
