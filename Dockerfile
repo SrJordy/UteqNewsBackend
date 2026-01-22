@@ -12,7 +12,7 @@ COPY src ./src
 RUN pnpm install --frozen-lockfile
 
 # Generar Prisma y compilar TypeScript
-RUN pnpm prisma generate && pnpm run build
+RUN npx prisma generate && pnpm run build
 
 # Copiar recursos y .env (necesario para la conexión a BD en las migraciones)
 COPY uploads ./uploads
