@@ -8,11 +8,15 @@ services:
       target: backend
     ports:
       - "9044:3000"
+    volumes:
+      - uteqnews_uploads:/app/uploads
+      - uteqnews_data:/app/data
+      - uteqnews_db:/app/dev.db
     restart: always
     networks:
       - apptestjava
-  nginx_ssl_java_apptest:
-    container_name: nginx_ssl_java_apptest
+  nginx_ssl_uteqnews:
+    container_name: nginx_ssl_uteqnews
     image: nginx
     build:
       context: .
@@ -43,6 +47,9 @@ services:
 volumes:
   nginxfiles:
     external: true
+  uteqnews_uploads:
+  uteqnews_data:
+  uteqnews_db:
 
 #el network se puede cambiar
 networks:

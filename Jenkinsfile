@@ -16,8 +16,10 @@ pipeline {
         stage('Build docker image'){
             steps{
                 script{
+                    sh 'docker stop uteqnews_backend || true'
+                    sh 'docker rm uteqnews_backend || true'
                     sh 'docker compose build'
-                    sh 'docker compose up -d'
+                    sh 'docker compose up -d --force-recreate'
                 }
             }
         }
