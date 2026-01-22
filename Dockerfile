@@ -13,7 +13,6 @@ RUN pnpm prisma generate && pnpm run build
 # Copiar recursos
 COPY uploads ./uploads
 COPY data ./data
-COPY dev.db ./
 COPY .env ./
 # Exponer puerto del backend
 EXPOSE 3000
