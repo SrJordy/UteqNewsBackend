@@ -1,13 +1,16 @@
 pipeline {
     agent any
-    tools{
-        maven 'maven_3_8_5'
-    }
     stages{
-        stage('Build Maven'){
+        stage('Checkout'){
             steps{
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/SrJordy/UteqNewsBackend.git']])
-                sh 'mvn clean install'
+            }
+        }
+        stage('Create .env'){
+            steps{
+                withCredentials([file(credentialsId: 'ENV_FILE', variable: 'ENV_SECRET')]) {
+                    sh 'cp $ENV_SECRET .env'
+                }
             }
         }
         stage('Build docker image'){

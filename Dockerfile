@@ -3,16 +3,18 @@ FROM node:20-alpine AS backend
 RUN npm install -g pnpm
 WORKDIR /app
 # Copiar archivos de dependencias primero (para cache de Docker)
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml tsconfig.json ./
 COPY prisma ./prisma
-# Instalar dependencias de producción y generar Prisma
-RUN pnpm install --prod --frozen-lockfile && pnpm prisma generate
-# Copiar archivos compilados y recursos
-COPY dist ./dist
-COPY .env ./
+COPY src ./src
+# Instalar TODAS las dependencias (incluye devDependencies para el build)
+RUN pnpm install --frozen-lockfile
+# Generar Prisma y compilar TypeScript
+RUN pnpm prisma generate && pnpm run build
+# Copiar recursos
 COPY uploads ./uploads
 COPY data ./data
 COPY dev.db ./
+COPY .env ./
 # Exponer puerto del backend
 EXPOSE 3000
 # Iniciar el servidor
