@@ -72,11 +72,14 @@ export const shouldRefreshToken = (decoded: DecodedToken): boolean => {
 
 /**
  * Configuración de cookies
+ * Para cross-origin (frontend en diferente puerto/dominio) se requiere:
+ * - sameSite: 'none' 
+ * - secure: true (OBLIGATORIO con sameSite='none')
  */
 export const getCookieOptions = (isProduction: boolean = false) => ({
     httpOnly: true,
-    secure: isProduction,
-    sameSite: 'lax' as const,
+    secure: true, // SIEMPRE true para HTTPS
+    sameSite: 'none' as const, // Necesario para cross-origin
     path: '/'
 });
 
