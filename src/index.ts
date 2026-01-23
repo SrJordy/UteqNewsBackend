@@ -31,9 +31,13 @@ server.register(helmet, {
   crossOriginOpenerPolicy: false,
 });
 
-// CORS - Permitir peticiones cross-origin
+// CORS - Permitir peticiones cross-origin (incluyendo apps móviles)
 server.register(cors, {
-  origin: true,
+  origin: (origin, callback) => {
+    // Permitir cualquier origen (necesario para apps móviles y desarrollo)
+    // No se puede usar '*' con credentials:true, pero sí retornar el origen dinámicamente
+    callback(null, true);
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
