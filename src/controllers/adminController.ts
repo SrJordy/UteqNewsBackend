@@ -687,7 +687,14 @@ export const uploadEvidenciasHandler = async (
                 const filePath = path.join(uploadDir, fileName);
 
                 const buffer = await part.toBuffer();
-                fs.writeFileSync(filePath, buffer);
+
+                // Comprimir imagen de evidencia
+                const isImage = ['.jpg', '.jpeg', '.png', '.webp'].includes(ext.toLowerCase());
+                if (isImage) {
+                    await compressImage(buffer, filePath, { quality: 85, maxWidth: 1200 });
+                } else {
+                    fs.writeFileSync(filePath, buffer);
+                }
                 nuevasImagenes.push(`noticias/evidencias/${fileName}`);
             }
         }
@@ -778,7 +785,14 @@ export const uploadTikTokPortadaHandler = async (
         const filePath = path.join(uploadDir, fileName);
 
         const buffer = await data.toBuffer();
-        fs.writeFileSync(filePath, buffer);
+
+        // Comprimir imagen de portada TikTok
+        const isImage = ['.jpg', '.jpeg', '.png', '.webp'].includes(ext.toLowerCase());
+        if (isImage) {
+            await compressImage(buffer, filePath, { quality: 85, maxWidth: 800 });
+        } else {
+            fs.writeFileSync(filePath, buffer);
+        }
 
         if (tiktok.portadaPath) {
             const oldPath = path.join(__dirname, '../../uploads', tiktok.portadaPath);
@@ -828,7 +842,13 @@ export const createRevistaHandler = async (
                 const fileName = `revista_${Date.now()}${ext}`;
 
                 if (part.fieldname === 'portada') {
-                    fs.writeFileSync(path.join(portadaDir, fileName), buffer);
+                    // Comprimir portada de revista
+                    const isImage = ['.jpg', '.jpeg', '.png', '.webp'].includes(ext.toLowerCase());
+                    if (isImage) {
+                        await compressImage(buffer, path.join(portadaDir, fileName), { quality: 85, maxWidth: 800 });
+                    } else {
+                        fs.writeFileSync(path.join(portadaDir, fileName), buffer);
+                    }
                     portadaPath = `revistas/portadas/${fileName}`;
                 } else if (part.fieldname === 'pdf') {
                     fs.writeFileSync(path.join(pdfDir, fileName), buffer);
